@@ -3,7 +3,6 @@ const { fetchUsers, fetchUser, registerUser, updateUser, deleteUser} = require("
 
 const router = express.Router();
 
-// User routes
 router.get("/users/all", fetchUsers);
 router.get("/users/:id", fetchUser);
 router.post("/users", registerUser);
