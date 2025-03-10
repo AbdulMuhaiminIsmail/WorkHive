@@ -1,7 +1,7 @@
 const { sql, connectDB } = require("../config/db");
 
 // Fetch all users
-const fetchUsers = async (req, res) => {
+const fetchAllUsers = async (req, res) => {
     try {
         const query = "SELECT * FROM Users";
 
@@ -120,4 +120,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = {fetchUsers, fetchUser, registerUser, updateUser, deleteUser}
+module.exports = {fetchAllUsers, fetchUser, registerUser, updateUser, deleteUser}
