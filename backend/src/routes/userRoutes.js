@@ -1,12 +1,12 @@
 const express = require("express");
-const { fetchAllUsers, fetchUser, registerUser, updateUser, deleteUser} = require("../controllers/userController");
+const { fetchAllUsers, fetchUser, updateUser, deleteUser} = require("../controllers/userController");
+const { verifyToken } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/users/all", fetchAllUsers);
-router.get("/users/:id", fetchUser); // to display UI for Account INFO
-router.post("/users", registerUser);
-router.put("/users/:id", updateUser); // Update user info
-router.delete("/users/:id", deleteUser);
+router.get("/all", verifyToken, fetchAllUsers);
+router.get("/:id", verifyToken, fetchUser); // to display UI for Account INFO
+router.put("/:id", verifyToken, updateUser); // Update user info
+router.delete("/:id", verifyToken, deleteUser);
 
 module.exports = router;

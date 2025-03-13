@@ -1,4 +1,4 @@
-const { sql, connectDB} = require("../config/db")
+const { sql, connectDB } = require("../config/db")
 
 const fetchAllJobs = async (req, res) => {
     try {
@@ -41,15 +41,15 @@ const createJob = async (req, res) => {
         VALUES (@title, @description, @client_id, @budget, @deadline);
         `;
 
-        const userData = req.body;
+        const jobData = req.body;
         
         const pool = await connectDB();
-        const { title, description, client_id, budget, deadline } = userData;
+        const { title, description, clientId, budget, deadline } = jobData;
 
         await pool.request()
             .input("title", sql.NVarChar(100), title)
             .input("description", sql.NVarChar(sql.MAX), description)
-            .input("client_id", sql.Int, client_id)
+            .input("client_id", sql.Int, clientId)
             .input("budget", sql.Decimal(10, 2), budget)
             .input("deadline", sql.Date, deadline)
             .query(query);
@@ -63,7 +63,7 @@ const createJob = async (req, res) => {
 
 const updateJob = async (req, res) => {
     try {
-        const userId = parseInt(req.params.id);
+        const jobId = parseInt(req.params.id);
         const updates = req.body;
 
         if (!updates || Object.keys(updates).length === 0) {
@@ -107,7 +107,7 @@ const updateJob = async (req, res) => {
 
         const request = pool.request();
         params.forEach(param => request.input(param.name, param.type, param.value));
-        request.input("id", sql.Int, userId);
+        request.input("id", sql.Int, jobId);
         await request.query(query);
 
         res.status(200).json({message: "Job updated successfully!"});

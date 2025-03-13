@@ -4,13 +4,23 @@ const cors = require("cors");
 
 const userRoutes = require("./src/routes/userRoutes");
 const jobRoutes = require("./src/routes/jobRoutes");
+const authRoutes = require("./src/routes/authRoutes");
+const bidRoutes = require("./src/routes/bidRoutes");
+const reviewRoutes = require("./src/routes/reviewRoutes");
+const paymentRoutes = require("./src/routes/paymentRoutes");
+const contractRoutes = require("./src/routes/contractRoutes");
 
 const app = express();
 app.use(express.json()); 
 app.use(cors());
 
-app.use("/", userRoutes);
-app.use("/", jobRoutes);
+app.use("/users", userRoutes);
+app.use("/jobs", jobRoutes);
+app.use("/auth", authRoutes);
+app.use("/bids", bidRoutes);
+app.use("/reviews", reviewRoutes);
+app.use("/payments", paymentRoutes);
+app.use("/contracts", contractRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
