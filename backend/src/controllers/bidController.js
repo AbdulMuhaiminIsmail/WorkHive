@@ -27,7 +27,7 @@ const placeBid = async (req, res) => {
 
 const fetchBid = async (req, res) => {
     try {
-        const bidId = req.params.id;
+        const bidId = parseInt(req.params.id);
         const query = "SELECT * FROM Bids WHERE id = @id";
 
         const pool = await connectDB();
@@ -44,7 +44,7 @@ const fetchBid = async (req, res) => {
 
 const deleteBid = async (req, res) => {
     try {
-        const bidId = req.params.id;
+        const bidId = parseInt(req.params.id);
         const query = "DELETE FROM Bids WHERE id = @id";
 
         const pool = await connectDB();
@@ -61,7 +61,7 @@ const deleteBid = async (req, res) => {
 
 const fetchAllBidsByFreelancer = async (req, res) => {
     try {
-        const freelancerId = req.params.id;
+        const freelancerId = parseInt(req.params.id);
         const query = "SELECT * FROM Bids WHERE freelancer_id = @freelancerId";
 
         const pool = await connectDB();
@@ -78,7 +78,7 @@ const fetchAllBidsByFreelancer = async (req, res) => {
 
 const fetchAllBidsOnJob = async (req, res) => {
     try {
-        const jobId = req.params.id;
+        const jobId = parseInt(req.params.id);
         const query = "SELECT * FROM Bids WHERE job_id = @jobId";
 
         const pool = await connectDB();

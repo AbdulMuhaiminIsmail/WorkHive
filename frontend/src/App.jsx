@@ -1,12 +1,29 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+// Auth Pages
 import Register from "./pages/Register";
 import Login from "./pages/login";
-import Home from "./pages/home";
 
+// Freelancer Pages
+import Home from "./pages/freelancer/home";
+import Bids from "./pages/freelancer/bids";
+import Bid from "./pages/freelancer/bid";
+// import Contracts from "./pages/freelancer/contracts";
+// import Payments from "./pages/freelancer/payments";
+// import Reviews from "./pages/freelancer/reviews";
+// import Account from "./pages/freelancer/account";
+
+// Routes
 const router = createBrowserRouter([
     { path: "/", element: <Register /> },
     { path: "/login", element: <Login />},
-    { path: "/home", element: <Home />}
+    { path: "/home", element: <Home />}, 
+    { path: "/bids", element: <Bids />},
+    { path: "/bid", element: <Bid />},
+    // { path: "./contracts", element: <Contracts />},
+    // { path: "./payments", element: <Payments />},
+    // { path: "./reviews", element: <Reviews />},
+    // { path: "./account", element: <Account />},
 ]);
 
 function App() {
