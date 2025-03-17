@@ -1,5 +1,22 @@
 const { sql, connectDB } = require("../config/db")
 
+const fetchAllJobsByClient = async (req, res) => {
+    try {
+        const query = "SELECT * FROM Jobs WHERE client_id = @client_id";
+        const clientId = parseInt(req.params.id)
+
+        const pool = await connectDB();
+        const response = await pool.request()
+                        .input("client_id", sql.Int, clientId)
+                        .query(query);
+
+        res.status(200).json(response.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal Server Error"});
+    }
+}
+
 const fetchAllJobs = async (req, res) => {
     try {
         const query = "SELECT * FROM Jobs";
@@ -134,4 +151,4 @@ const deleteJob = async (req, res) => {
     }
 }
 
-module.exports = { fetchAllJobs, fetchJob, createJob, updateJob, deleteJob };
+module.exports = { fetchAllJobsByClient, fetchAllJobs, fetchJob, createJob, updateJob, deleteJob };

@@ -1,3 +1,5 @@
+import AddIcon from "@mui/icons-material/Add";
+import { Fab } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, TextField, List, ListItem, ListItemText, Paper, Box, Divider } from "@mui/material";
@@ -27,8 +29,8 @@ const Home = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const user = location.state?.user;
-    const token = location.state?.token;
+    const user = location.state?.user // || JSON.parse(localStorage.getItem("user"));
+    const token = location.state?.token // || localStorage.getItem("token");
 
     const [jobs, setJobs] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -36,11 +38,18 @@ const Home = () => {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const response = await axios.get("http://localhost:5000/jobs", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    }
-                });
+                const response = (user.user_type === "Freelancer") ?
+                    await axios.get("http://localhost:5000/jobs", {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }
+                    }) :
+                    await axios.get(`http://localhost:5000/jobs/${user.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }
+                    });
+                console.log(response.data);
                 setJobs(response.data);
             } catch (err) {
                 console.error(err);
@@ -49,10 +58,23 @@ const Home = () => {
         fetchJobs();
     }, [token]);
 
-    const filteredJobs = jobs.filter(job =>
+    const filteredJobs = (user.user_type === "Freelancer") ? jobs.filter(job =>
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ) : jobs;
+
+    const deleteJob = async (jobId) => {
+        try {
+            await axios.delete(`http://localhost:5000/jobs/${jobId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            setJobs(jobs.filter(job => job.id !== jobId));
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
     return (
         <>
@@ -74,20 +96,24 @@ const Home = () => {
             {/* Main Content */}
             <Box sx={{ maxWidth: 1080, margin: "auto", padding: 3 }}>
                 <Typography variant="h5" sx={{ fontWeight: "bold", textAlign: "center", marginBottom: 2 }}>
-                    Home
-                </Typography>
-                <TextField
+                {user.user_type === "Freelancer" ? "Available Jobs" : "Posted Jobs"}
+                </Typography> 
+
+                {user.user_type === "Freelancer" && (
+                    <TextField
                     fullWidth
                     label="Search Jobs"
                     variant="outlined"
                     sx={{ marginBottom: 2 }}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                    /> 
+                )}
+
                 <Paper sx={{ padding: 2, background: "#f9f9f9" }}>
                     <List>
                         {filteredJobs.length === 0 ? (
                             <Typography variant="body1" sx={{ textAlign: "center", padding: 2 }}>
-                                No jobs found.
+                                {user.user_type === "Freelancer" ? "No jobs found." : "No jobs posted."}
                             </Typography>
                         ) : (
                             filteredJobs.map((job) => (
@@ -97,7 +123,11 @@ const Home = () => {
                                             primary={
                                                 <Box sx={{ display: "flex", justifyContent: "space-between", padding: "10px 16px" }}>
                                                     <Typography variant="h6" sx={{ fontWeight: "bold" }}>{job.title}</Typography>
-                                                    <Button color="inherit" onClick={() => navigate("/bid", { state: { user, job, token} })}>Bid</Button>
+                                                    {user.user_type === "Freelancer" ? (
+                                                        <Button color="error" onClick={() => navigate("/jobDetails", { state: { user, job, token } })}>Details</Button>
+                                                    ) : (
+                                                        <Button color="error" onClick={() => deleteJob(job.id)}>Delete</Button>
+                                                    )}        
                                                 </Box>
                                             }
                                             secondary={
@@ -119,6 +149,17 @@ const Home = () => {
                     </List>
                 </Paper>
             </Box>
+
+            {/* Floating Action Button (FAB) for Clients to Post Jobs */}
+            {user.user_type !== "Freelancer" && (
+                <Fab 
+                    color="primary" 
+                    sx={{ position: "fixed", bottom: 20, right: 20 }} 
+                    onClick={() => navigate("/postJob", { state: { user, token } })}
+                >
+                    <AddIcon />
+                </Fab>
+            )}
         </>
     );
 };

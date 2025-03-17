@@ -11,42 +11,62 @@ const Bids = () => {
     const token = location.state?.token;
 
     const [bids, setBids] = useState([]);
-    const [jobs, setJobs] = useState({});
-    const [loading, setLoading] = useState(true);
+    const [jobs, setJobs] = useState([]);
+    //const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!token || !user) {
+            console.log("Skipping API call because token/user is missing");
+            return;
+        }
+    
         const fetchBids = async () => {
             try {
                 const bidsResponse = await axios.get(`http://localhost:5000/bids/freelancer/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-
+                console.log("Bids response:", bidsResponse.data);
                 setBids(bidsResponse.data);
-
+    
+                if (!bidsResponse.data.length) {
+                    console.log("No bids found.");
+                    return;
+                }
+    
                 const jobsRequests = bidsResponse.data.map((bid) =>
                     axios.get(`http://localhost:5000/jobs/${bid.job_id}`, {
                         headers: { Authorization: `Bearer ${token}` },
                     })
                 );
-  
+
                 const jobsResponses = await Promise.all(jobsRequests);
+                console.log("Jobs responses/n", jobsResponses);
 
-                const jobsData = {};
-                jobsResponses.forEach((response, index) => {
-                    jobsData[bidsResponse.data[index].job_id] = response.data;
-                });
-
+                let jobsData = {};
+                for (let i = 0; i < jobsResponses.length; i++) {
+                    const job = jobsResponses[i].data[0];
+                    jobsData[job.id] = job;
+                }
+    
                 setJobs(jobsData);
-                setLoading(false);
             } catch (err) {
-                console.error(err);
-                setLoading(false);
+                console.error("Error fetching data:", err);
             }
         };
+    
         fetchBids();
-    }, [token]);
-
-    if (loading) return <p>Loading...</p>;
+    }, [token, user]); 
+    
+    const handleDeleteBid = async (bidId) => {
+        try {
+            await axios.delete(`http://localhost:5000/bids/${bidId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setBids(bids.filter((bid) => bid.id !== bidId));
+        } catch (err) {
+            console.error("Error deleting bid:", err);
+        }
+    };
 
     return (
         <>
@@ -103,6 +123,14 @@ const Bids = () => {
                                                 </>
                                             }
                                         />
+                                        <Button
+                                            variant="contained"
+                                            color="error"
+                                            onClick={() => handleDeleteBid(bid.id)}
+                                            sx={{ marginLeft: 2 }}
+                                        >
+                                            Delete
+                                        </Button>
                                     </ListItem>
                                     <Divider />
                                 </div>

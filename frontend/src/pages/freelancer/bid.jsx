@@ -16,14 +16,14 @@ const Bid = () => {
 
     const placeBid = async () => {
         try {
-            const response = await axios.post(`http://localhost:5000/bids`, 
+            await axios.post(`http://localhost:5000/bids`, 
                 {jobId: job.id, freelancerId: user.id, coverLetter, bidAmount},
                 {headers: { Authorization: `Bearer ${token}` }}
             );
 
-            navigate("/bids", { state: { user, token } })
+            navigate("/home", { state: { user, token } });
         } catch (err) {
-            console.error(err)
+            console.error(err);
         }
     }
 

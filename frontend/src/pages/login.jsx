@@ -18,11 +18,12 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log(formData);
             const response = await axios.post("http://localhost:5000/auth/login", formData);
             setMessage("Login successful!");
             const user = response.data.user;
             const token = response.data.token;
+            // localStorage.setItem("token", token);
+            // localStorage.setItem("user", JSON.stringify(user));
             navigate("/home", { state: { user, token } });
         } catch (err) {
             console.error(err);
