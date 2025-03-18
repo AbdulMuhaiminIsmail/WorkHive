@@ -10,6 +10,7 @@ import axios from "axios";
 const timeAgo = (datetime) => {
     const now = new Date();
     const postedDate = new Date(datetime);
+    console.log("POsted date: ", postedDate);
     const diffInSeconds = Math.floor((now - postedDate) / 1000);
 
     if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
@@ -124,10 +125,12 @@ const Home = () => {
                                             primary={
                                                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px" }}>
                                                     <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, minWidth: 0 }}>
-                                                        <IconButton size="small" color="primary">
-                                                            <Edit />
-                                                        </IconButton>
-                                                        <Typography variant="h6" sx={{ fontWeight: "bold", marginLeft: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                        {user.user_type !== "Freelancer" && (
+                                                            <IconButton size="small" color="primary">
+                                                                <Edit />
+                                                            </IconButton>
+                                                        )}
+                                                        <Typography variant="h6" sx={{ fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                                             {job.title}
                                                         </Typography>
                                                     </Box>

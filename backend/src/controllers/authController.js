@@ -34,11 +34,16 @@ const loginUser = async (req, res) => {
             message: "Login successful!",
             user: {
                 "id": user.id,
+                "name": user.name, 
+                "cnic": user.cnic, 
                 "email": user.email,
                 "phone_number": user.phone_number,
                 "biography": user.biography,
                 "skills": user.skills,
-                "user_type": user.user_type
+                "user_type": user.user_type,
+                "jobs_count": user.jobs_count,
+                "avg_rating": user.avg_rating,
+                "created_at": user.created_at
             },
             token
         });
