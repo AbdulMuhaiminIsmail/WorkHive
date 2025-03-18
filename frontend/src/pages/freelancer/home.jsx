@@ -1,8 +1,9 @@
-import AddIcon from "@mui/icons-material/Add";
+import { Add as AddIcon } from "@mui/icons-material";
 import { Fab } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Button, TextField, List, ListItem, ListItemText, Paper, Box, Divider } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, TextField, List, ListItem, ListItemText, Paper, Box, Divider, IconButton } from "@mui/material";
+import { Delete, Edit, ArrowForward } from "@mui/icons-material";
 import axios from "axios";
 
 // Function to format "time ago"
@@ -49,7 +50,6 @@ const Home = () => {
                             Authorization: `Bearer ${token}`,
                         }
                     });
-                console.log(response.data);
                 setJobs(response.data);
             } catch (err) {
                 console.error(err);
@@ -58,10 +58,10 @@ const Home = () => {
         fetchJobs();
     }, [token]);
 
-    const filteredJobs = (user.user_type === "Freelancer") ? jobs.filter(job =>
+    const filteredJobs = jobs.filter(job =>
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.description.toLowerCase().includes(searchTerm.toLowerCase())
-    ) : jobs;
+    );
 
     const deleteJob = async (jobId) => {
         try {
@@ -85,7 +85,7 @@ const Home = () => {
                         WorkHive
                     </Typography>
                     <Button color="inherit" onClick={() => navigate("/home", { state: { user, token } })}>Jobs</Button>
-                    <Button color="inherit" onClick={() => navigate("/bids", { state: {user, token} })}>Bids</Button>
+                    {user.user_type === "Freelancer" && (<Button color="inherit" onClick={() => navigate("/bids", { state: {user, token} })}>Bids</Button>)}
                     <Button color="inherit" onClick={() => navigate("/contracts", { state: {user, token} })}>Contracts</Button>
                     <Button color="inherit" onClick={() => navigate("/payments", { state: {user, token} })}>Payments</Button>
                     <Button color="inherit" onClick={() => navigate("/reviews", { state: {user, token} })}>Reviews</Button>
@@ -95,25 +95,26 @@ const Home = () => {
 
             {/* Main Content */}
             <Box sx={{ maxWidth: 1080, margin: "auto", padding: 3 }}>
+                {/* Page Title */}
                 <Typography variant="h5" sx={{ fontWeight: "bold", textAlign: "center", marginBottom: 2 }}>
                 {user.user_type === "Freelancer" ? "Available Jobs" : "Posted Jobs"}
                 </Typography> 
 
-                {user.user_type === "Freelancer" && (
-                    <TextField
+                {/* Search Bar */}    
+                <TextField
                     fullWidth
                     label="Search Jobs"
                     variant="outlined"
                     sx={{ marginBottom: 2 }}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    /> 
-                )}
+                /> 
 
+                {/* List of Jobs */}
                 <Paper sx={{ padding: 2, background: "#f9f9f9" }}>
                     <List>
                         {filteredJobs.length === 0 ? (
                             <Typography variant="body1" sx={{ textAlign: "center", padding: 2 }}>
-                                {user.user_type === "Freelancer" ? "No jobs found." : "No jobs posted."}
+                                {user.user_type === "Freelancer" ? "No jobs available." : "No jobs posted."}
                             </Typography>
                         ) : (
                             filteredJobs.map((job) => (
@@ -121,13 +122,24 @@ const Home = () => {
                                     <ListItem alignItems="flex-start">
                                         <ListItemText
                                             primary={
-                                                <Box sx={{ display: "flex", justifyContent: "space-between", padding: "10px 16px" }}>
-                                                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>{job.title}</Typography>
+                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px" }}>
+                                                    <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, minWidth: 0 }}>
+                                                        <IconButton size="small" color="primary">
+                                                            <Edit />
+                                                        </IconButton>
+                                                        <Typography variant="h6" sx={{ fontWeight: "bold", marginLeft: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                            {job.title}
+                                                        </Typography>
+                                                    </Box>
                                                     {user.user_type === "Freelancer" ? (
-                                                        <Button color="error" onClick={() => navigate("/jobDetails", { state: { user, job, token } })}>Details</Button>
+                                                        <IconButton size="small" color="primary" onClick={() => navigate("/jobDetails", { state: { user, job, token } })}>
+                                                            <ArrowForward />
+                                                        </IconButton>
                                                     ) : (
-                                                        <Button color="error" onClick={() => deleteJob(job.id)}>Delete</Button>
-                                                    )}        
+                                                        <IconButton size="small" sx={{ backgroundColor: "red", color: "white" }} onClick={() => deleteJob(job.id)}>
+                                                            <Delete />
+                                                        </IconButton>
+                                                    )}
                                                 </Box>
                                             }
                                             secondary={
@@ -138,8 +150,13 @@ const Home = () => {
                                             }
                                         />
                                     </ListItem>
-                                    <Box sx={{ display: "flex", justifyContent: "space-between", padding: "10px 16px" }}>
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", padding: "10px 16px", alignItems: "center" }}>
                                         <Typography variant="subtitle2" color="textSecondary"><b>Budget:</b> PKR {job.budget}</Typography>
+                                        {user.user_type === "Client" && (
+                                            <Button variant="contained" color="primary" onClick={() => navigate("/bids", { state: { user, job, token } })}>
+                                                View Bids
+                                            </Button>
+                                        )}
                                         <Typography variant="subtitle2" color="textSecondary"><b>Deadline:</b> {new Date(job.deadline).toLocaleDateString()}</Typography>
                                     </Box>
                                     <Divider />

@@ -1,5 +1,32 @@
 const { sql, connectDB } = require("../config/db")
 
+const fetchJobsByIds = async (req, res) => {
+    try {
+        let { jobIds } = req.body;
+
+        if (!jobIds || !Array.isArray(jobIds) || jobIds.length === 0) {
+            return res.status(400).json({ error: "No job IDs provided." });
+        }
+
+        // Create parameter placeholders (@id0, @id1, ...)
+        const paramPlaceholders = jobIds.map((_, index) => `@id${index}`).join(", ");
+        const query = `SELECT * FROM Jobs WHERE id IN (${paramPlaceholders}) ORDER BY id ASC`;
+
+        const pool = await connectDB();
+        const request = pool.request();
+
+        jobIds.forEach((id, index) => {
+            request.input(`id${index}`, sql.Int, id);
+        });
+
+        const response = await request.query(query);
+        res.status(200).json(response.recordset);
+    } catch (err) {
+        console.error("Database error:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 const fetchAllJobsByClient = async (req, res) => {
     try {
         const query = "SELECT * FROM Jobs WHERE client_id = @client_id";
@@ -151,4 +178,4 @@ const deleteJob = async (req, res) => {
     }
 }
 
-module.exports = { fetchAllJobsByClient, fetchAllJobs, fetchJob, createJob, updateJob, deleteJob };
+module.exports = { fetchJobsByIds, fetchAllJobsByClient, fetchAllJobs, fetchJob, createJob, updateJob, deleteJob };

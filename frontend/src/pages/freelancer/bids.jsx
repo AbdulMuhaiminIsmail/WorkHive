@@ -3,52 +3,57 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, List, ListItem, ListItemText, Paper, Box, Divider } from "@mui/material";
 import axios from "axios";
 
+// Function to format "time ago"
+const timeAgo = (datetime) => {
+    const now = new Date();
+    const postedDate = new Date(datetime);
+    const diffInSeconds = Math.floor((now - postedDate) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} days ago`;
+};
+
+// Function to truncate text
+const truncateText = (text, maxLength = 120) => {
+    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+};
+
 const Bids = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
     const user = location.state?.user;
+    const job = location.state?.job;
     const token = location.state?.token;
 
     const [bids, setBids] = useState([]);
     const [jobs, setJobs] = useState([]);
-    //const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (!token || !user) {
-            console.log("Skipping API call because token/user is missing");
-            return;
-        }
-    
+    useEffect(() => {    
         const fetchBids = async () => {
             try {
-                const bidsResponse = await axios.get(`http://localhost:5000/bids/freelancer/${user.id}`, {
+                const bidsResponse = (user.user_type === "Freelancer") ? await axios.get(`http://localhost:5000/bids/freelancer/${user.id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }) : await axios.get(`http://localhost:5000/bids/job/${job.id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                console.log("Bids response:", bidsResponse.data);
-                setBids(bidsResponse.data);
-    
-                if (!bidsResponse.data.length) {
-                    console.log("No bids found.");
-                    return;
-                }
-    
-                const jobsRequests = bidsResponse.data.map((bid) =>
-                    axios.get(`http://localhost:5000/jobs/${bid.job_id}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    })
-                );
 
-                const jobsResponses = await Promise.all(jobsRequests);
-                console.log("Jobs responses/n", jobsResponses);
+                setBids(bidsResponse.data.sort());
 
-                let jobsData = {};
-                for (let i = 0; i < jobsResponses.length; i++) {
-                    const job = jobsResponses[i].data[0];
-                    jobsData[job.id] = job;
+                if (user.user_type === "Freelancer") {
+                    const jobIds = bidsResponse.data.map((bid) => bid.job_id);
+                    const jobsResponse = await axios.post("http://localhost:5000/jobs/byids",
+                        {jobIds}, 
+                        {headers: { Authorization: `Bearer ${token}` }}
+                    );
+                    
+                    setJobs(jobsResponse.data); 
                 }
-    
-                setJobs(jobsData);
             } catch (err) {
                 console.error("Error fetching data:", err);
             }
@@ -88,7 +93,7 @@ const Bids = () => {
             {/* Bids List */}
             <Box sx={{ maxWidth: 900, margin: "auto", padding: 3 }}>
                 <Typography variant="h5" sx={{ fontWeight: "bold", textAlign: "center", marginBottom: 2 }}>
-                    My Bids
+                    {user.user_type === "Freelancer" ? "My Bids" : "Job Bids"}
                 </Typography>
                 <Paper sx={{ padding: 2, background: "#f9f9f9" }}>
                     <List>
@@ -97,40 +102,76 @@ const Bids = () => {
                                 No bids placed yet.
                             </Typography>
                         ) : (
-                            bids.map((bid) => (
+                            bids.map((bid, index) => (
                                 <div key={bid.id}>
                                     <ListItem alignItems="flex-start">
                                         <ListItemText
                                             primary={
-                                                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                                                    {jobs[bid.job_id]?.title || "Loading..."}
-                                                </Typography>
+                                                user.user_type === "Freelancer" ? (
+                                                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                                                        {jobs[index]?.title}
+                                                    </Typography>
+                                                ) : (
+                                                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                                                        {job.title} 
+                                                    </Typography>
+                                                )
                                             }
                                             secondary={
                                                 <>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        Budget: PKR {jobs[bid.job_id]?.budget || "Loading..."}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        Bid Amount: PKR {bid.bid_amount}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="textSecondary">
-                                                        Deadline: {new Date(jobs[bid.job_id]?.deadline).toLocaleDateString() || "Loading..."}
-                                                    </Typography>
-                                                    <Typography variant="body1" sx={{ marginTop: 1 }}>
-                                                        {jobs[bid.job_id]?.description || "Loading..."}
-                                                    </Typography>
+                                                    {user.user_type === "Freelancer" ? (
+                                                        <>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                Budget: PKR {jobs[index]?.budget}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                Bid Amount: PKR {bid.bid_amount}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                Deadline: {new Date(jobs[index]?.deadline).toLocaleDateString()}
+                                                            </Typography>
+                                                            <Typography variant="body1" sx={{ marginTop: 1 }}>
+                                                                {jobs[index]?.description}
+                                                            </Typography>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                {timeAgo(bid.bid_at)}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                Budget: PKR {job.budget}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                Bid Amount: PKR {bid.bid_amount}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="textSecondary">
+                                                                Cover Letter: {truncateText(bid.cover_letter)}
+                                                            </Typography>
+                                                        </>
+                                                    )}
                                                 </>
                                             }
                                         />
-                                        <Button
-                                            variant="contained"
-                                            color="error"
-                                            onClick={() => handleDeleteBid(bid.id)}
-                                            sx={{ marginLeft: 2 }}
-                                        >
-                                            Delete
-                                        </Button>
+                                        {user.user_type === "Freelancer" ? (
+                                            <Button
+                                                variant="contained"
+                                                color="error"
+                                                onClick={() => handleDeleteBid(bid.id)}
+                                                sx={{ marginLeft: 2 }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={() => navigate(`/bidDetails/${bid.id}`, { state: { user, bid, token } })}
+                                                sx={{ marginLeft: 2 }}
+                                            >
+                                                View
+                                            </Button>
+                                        )}
                                     </ListItem>
                                     <Divider />
                                 </div>
@@ -139,6 +180,7 @@ const Bids = () => {
                     </List>
                 </Paper>
             </Box>
+
         </>
     );
 };
