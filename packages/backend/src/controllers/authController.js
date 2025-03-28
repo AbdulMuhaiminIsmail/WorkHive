@@ -41,8 +41,7 @@ const loginUser = async (req, res) => {
                 "phone_number": user.phone_number,
                 "biography": user.biography,
                 "profile_picture_url": user.profile_picture_url,
-                "avg_rating": user.avg_rating,
-                "created_at": user.created_at
+                "user_type": user.user_type
             },
             token
         });

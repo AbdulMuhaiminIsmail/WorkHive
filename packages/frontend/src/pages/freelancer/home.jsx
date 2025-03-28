@@ -10,7 +10,6 @@ import axios from "axios";
 const timeAgo = (datetime) => {
     const now = new Date();
     const postedDate = new Date(datetime);
-    console.log("POsted date: ", postedDate);
     const diffInSeconds = Math.floor((now - postedDate) / 1000);
 
     if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
@@ -54,6 +53,8 @@ const Home = () => {
                 setJobs(response.data);
             } catch (err) {
                 console.error(err);
+            } finally {
+                console.log(user);
             }
         };
         fetchJobs();
