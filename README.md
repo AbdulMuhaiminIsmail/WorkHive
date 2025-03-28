@@ -13,15 +13,6 @@ WorkHive is a **full-stack social platform** designed to foster **collaboration,
 - **API Testing**: Postman
 - **Version Control**: Git & GitHub
 
-## 🛠 Features
-
-✅ User Authentication & Authorization (JWT-based)\
-✅ Profile Management\
-✅ Content Sharing & Networking\
-✅ Messaging & Collaboration Tools\
-✅ Personalized Feeds & Notifications\
-✅ Advanced Search & Filtering
-
 ## 📂 Folder Structure
 
 ```
@@ -54,33 +45,6 @@ WorkHive/
 │── README.md                 # Project Documentation
 │── LICENSE                   # License File
 ```
-
-## 🔧 Installation & Setup
-
-### 1️⃣ Clone the Repository
-
-```bash
-git clone https://github.com/AbdulMuhaiminIsmail/WorkHive.git
-cd WorkHive
-```
-
-### 2️⃣ Backend Setup
-
-```bash
-cd backend
-npm install
-npm start
-```
-
-### 3️⃣ Frontend Setup
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## 🛡 License
 
 This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
 
