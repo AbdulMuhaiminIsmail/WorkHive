@@ -53,8 +53,6 @@ const Home = () => {
                 setJobs(response.data);
             } catch (err) {
                 console.error(err);
-            } finally {
-                console.log(user);
             }
         };
         fetchJobs();

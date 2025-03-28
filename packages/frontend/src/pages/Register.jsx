@@ -23,6 +23,7 @@ const Register = () => {
         e.preventDefault();
         try {
             const response = await axios.post("http://localhost:5000/auth/register", formData);
+            console.log(response);
             setMessage("Registration successful!");
             navigate("/login");
         } catch (err) {

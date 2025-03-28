@@ -1,5 +1,5 @@
-const { sql, connectDB } = require("../config/db");
 const bcryptjs = require("bcryptjs");
+const { sql, connectDB } = require("../config/db");
 const { generateToken } = require("../utils/jwtUtils");
 
 // Login the user
