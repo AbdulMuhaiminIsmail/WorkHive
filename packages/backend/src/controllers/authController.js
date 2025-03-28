@@ -35,13 +35,12 @@ const loginUser = async (req, res) => {
             user: {
                 "id": user.id,
                 "name": user.name, 
+                "title": user.title, 
                 "cnic": user.cnic, 
                 "email": user.email,
                 "phone_number": user.phone_number,
                 "biography": user.biography,
-                "skills": user.skills,
-                "user_type": user.user_type,
-                "jobs_count": user.jobs_count,
+                "profile_picture_url": user.profile_picture_url,
                 "avg_rating": user.avg_rating,
                 "created_at": user.created_at
             },
@@ -57,11 +56,11 @@ const loginUser = async (req, res) => {
 const registerUser = async (req, res) => {
     try {
         const query = `
-            INSERT INTO Users (name, email, pass_hash, cnic, phone_number, biography, skills, user_type)
-            VALUES (@name, @email, @pass_hash, @cnic, @phone_number, @biography, @skills, @user_type)
+            INSERT INTO Users (name, title, email, pass_hash, cnic, phone_number, biography, profile_picture_url, user_type)
+            VALUES (@name, @title, @email, @pass_hash, @cnic, @phone_number, @biography, @profile_picture_url, @user_type)
         `;
 
-        const { name, email, password, cnic, phoneNumber, biography, skills, userType } = req.body;
+        const { name, title, email, password, cnic, phoneNumber, biography, profile_picture_url, userType } = req.body;
 
         const salt = await bcryptjs.genSalt(10);
         const hashedPassword = await bcryptjs.hash(password, salt);
@@ -69,12 +68,13 @@ const registerUser = async (req, res) => {
         const pool = await connectDB();
         await pool.request()
             .input("name", sql.NVarChar(100), name)
+            .input("title", sql.NVarChar(100), title)
             .input("email", sql.NVarChar(100), email)
             .input("pass_hash", sql.NVarChar(255), hashedPassword)
             .input("cnic", sql.VarChar(15), cnic)
             .input("phone_number", sql.VarChar(13), phoneNumber)
             .input("biography", sql.NVarChar(sql.MAX), biography)
-            .input("skills", sql.NVarChar(255), skills)
+            .input("profile_picture_url", sql.NVarChar(sql.MAX), profile_picture_url)
             .input("user_type", sql.NVarChar(10), userType)
             .query(query);
 

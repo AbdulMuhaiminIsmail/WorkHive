@@ -35,12 +35,12 @@ const Account = () => {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 3, marginBottom: 4 }}>
                         <Avatar sx={{ width: 120, height: 120, backgroundColor: "#ddd" }} />
                         <Box>
-                            <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+                            {/* <Typography variant="h4" sx={{ fontWeight: "bold" }}>
                                 {user.name}{" "}
                                 <span style={{ fontSize: "1rem", color: "#666" }}>
                                     ({user.avg_rating} <Star sx={{ color: "gold", fontSize: "1rem" }} />)
                                 </span>
-                            </Typography>
+                            </Typography> */}
                             <Typography variant="subtitle1" sx={{ color: "#666" }}>
                                 {user.title || "No title provided"}
                             </Typography>
@@ -71,7 +71,7 @@ const Account = () => {
                             <Typography variant="body1" sx={{ maxWidth: "70%", textAlign: "right" }}>{user.biography || "No bio provided"}</Typography>
                         </Box>
 
-                        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        {/* <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                             <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Skills:</Typography>
                             <Typography variant="body1">{user.skills || "No skills listed"}</Typography>
                         </Box>
@@ -79,7 +79,7 @@ const Account = () => {
                         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                             <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Jobs Completed:</Typography>
                             <Typography variant="body1">{user.jobs_count}</Typography>
-                        </Box>
+                        </Box> */}
 
                         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                             <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Joined On:</Typography>
