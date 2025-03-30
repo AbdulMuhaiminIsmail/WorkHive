@@ -166,7 +166,7 @@ const Bids = () => {
                                             <Button
                                                 variant="contained"
                                                 color="primary"
-                                                onClick={() => navigate(`/bidDetails/${bid.id}`, { state: { user, bid, token } })}
+                                                onClick={() => navigate(`/bidDetails/${bid.id}`, { state: { user, bid, job, token } })}
                                                 sx={{ marginLeft: 2 }}
                                             >
                                                 View
