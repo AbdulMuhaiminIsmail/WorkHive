@@ -3,47 +3,25 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, List, ListItem, ListItemText, Paper, Box, Divider } from "@mui/material";
 import axios from "axios";
 
-// Function to format "time ago"
-const timeAgo = (datetime) => {
-    const now = new Date();
-    const postedDate = new Date(datetime);
-    const diffInSeconds = Math.floor((now - postedDate) / 1000);
-
-    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} hours ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} days ago`;
-};
-
-// Function to truncate text
-const truncateText = (text, maxLength = 120) => {
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
-};
-
 const Contracts = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
     const user = location.state?.user;
-    const job = location.state?.job;
     const token = location.state?.token;
 
-    const [Contracts, setContracts] = useState([]);
-    const [jobs, setJobs] = useState([]);
+    const [contracts, setContracts] = useState([]);
 
     useEffect(() => {    
         const fetchContracts = async () => {
             try {
-                const ContractsResponse = (user.user_type === "Freelancer") ? await axios.get(`http://localhost:5000/Contracts/freelancer/${user.id}`, {
+                const contractsResponse = (user.user_type === "Freelancer") ? await axios.get(`http://localhost:5000/Contracts/freelancer/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` },
-                }) : await axios.get(`http://localhost:5000/Contracts/job/${job.id}`, {
+                }) : await axios.get(`http://localhost:5000/contracts/client/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                setContracts(ContractsResponse.data.sort());
+                setContracts(contractsResponse.data);
 
                 if (user.user_type === "Freelancer") {
                     const joContracts = ContractsResponse.data.map((bid) => bid.job_id);

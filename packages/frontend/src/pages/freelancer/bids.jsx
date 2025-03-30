@@ -180,7 +180,6 @@ const Bids = () => {
                     </List>
                 </Paper>
             </Box>
-
         </>
     );
 };

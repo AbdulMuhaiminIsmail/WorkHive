@@ -1,5 +1,44 @@
 const { sql, connectDB } = require('../config/db');
 
+const fetchAllContractsOfFreelancer = async (req, res) => {
+    try {
+        const freelancerId = req.params.id;
+        const query = `SELECT * FROM Contracts 
+                       WHERE freelancer_id = @freelancerId`;
+
+        const pool = await connectDB();
+        const response = await pool.request()
+                            .input("freelancerId", sql.Int, freelancerId)
+                            .query(query);
+
+        res.status(200).json(response.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal Server Error"});
+    }
+}
+
+const fetchAllContractsOfClient = async (req, res) => {
+    try {
+        const clientId = req.params.id;
+        const query = `SELECT * FROM Contracts
+                       WHERE job_id IN (
+                            SELECT id FROM Jobs
+                            WHERE client_id = @clientId
+                       )`;
+
+        const pool = await connectDB();
+        const response = await pool.request()
+                            .input("clientId", sql.Int, clientId)
+                            .query(query);
+
+        res.status(200).json(response.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal Server Error"});
+    }
+}
+
 const fetchContract = async (req, res) => {
     try {
         const contractId = req.params.id;
@@ -77,4 +116,4 @@ const updateContract = async (req, res) => {
     }
 }
 
-module.exports = { fetchContract, createContract, updateContract };
+module.exports = { fetchContract, fetchAllContractsOfClient, fetchAllContractsOfFreelancer, createContract, updateContract };
