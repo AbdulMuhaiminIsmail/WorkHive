@@ -8,6 +8,8 @@ const Account = () => {
     const user = location.state?.user;
     const token = location.state?.token;
 
+    console.log(user);
+
     const isCurrentUser = true; // Replace with actual logic if needed
 
     return (
