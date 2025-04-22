@@ -12,6 +12,7 @@ const fetchAllContractsOfFreelancer = async (req, res) => {
                             .query(query);
 
         res.status(200).json(response.recordset);
+        console.log(response.recordset);
     } catch (err) {
         console.error(err);
         res.status(500).json({error: "Internal Server Error"});
@@ -60,6 +61,7 @@ const createContract = async (req, res) => {
     try {
         const query = `
             INSERT INTO Contracts (job_id, freelancer_id, agreed_amount)
+            OUTPUT INSERTED.id
             VALUES (@jobId, @freelancerId, @agreedAmount);
         `;
 
@@ -67,13 +69,18 @@ const createContract = async (req, res) => {
         const { jobId, freelancerId, agreedAmount } = contractData;
 
         const pool = await connectDB();
-        await pool.request()
+        const response = await pool.request()
             .input("jobId", sql.Int, jobId)
             .input("freelancerId", sql.Int, freelancerId)
             .input("agreedAmount", sql.Decimal(10, 2), agreedAmount)
             .query(query);
+        
+        const id = response.recordset[0].id;
 
-        res.status(200).json({message: "Contract created successfully"});
+        res.status(200).json({
+                message: "Contract created successfully",
+                contractId: id
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({error: "Internal Server Error"});

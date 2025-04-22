@@ -14,10 +14,24 @@ const BidDetails = () => {
     const signContract = async () => {
         try {
             const response = await axios.post(`http://localhost:5000/contracts`,
-                {jobId: job.id, freelancerId: user.id, agreedAmount: bid.bid_amount},
-                {headers: { Authorization: `Bearer ${token}`} }
+                {
+                    jobId: job.id, 
+                    freelancerId: bid.freelancer_id, 
+                    agreedAmount: bid.bid_amount
+                },
+                {headers: { Authorization: `Bearer ${token}` } }
             );
+
             console.log(response);
+            
+            await axios.post(`http://localhost:5000/payments`,
+                {
+                    contractId: response.data.contractId,
+                    amount: bid.bid_amount
+                },
+                {headers: { Authorization: `Bearer ${token}` } }
+            )
+
             navigate("/home", { state: { user, token } });
         } catch (err) {
             console.error(err);

@@ -5,7 +5,7 @@ const fetchAllReviewsForFreelancer = async (req, res) => {
         const freelancerId = parseInt(req.params.id);
         const query = `
             SELECT * FROM Reviews WHERE contract_id IN (
-                SELECT id FROM Contracts WHERE freelancer_id = @id
+                SELECT id FROM Contracts WHERE freelancer_id = @id AND status = 'Completed'
             );
         `;
 

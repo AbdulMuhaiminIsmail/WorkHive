@@ -43,7 +43,7 @@ const Bids = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                setBids(bidsResponse.data.sort());
+                setBids(bidsResponse.data);
 
                 if (user.user_type === "Freelancer") {
                     const jobIds = bidsResponse.data.map((bid) => bid.job_id);

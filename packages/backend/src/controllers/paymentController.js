@@ -1,14 +1,53 @@
 const { NVarChar } = require("mssql");
 const { sql, connectDB } = require("../config/db")
 
-const fetchPayment = async (req, res) => {
+const fetchAllPaymentsOfFreelancer = async (req, res) => {
     try {
-        const paymentId = parseInt(req.params.id);
-        const query = "SELECT * FROM Payments WHERE id = @id";
+        const freelancerId = parseInt(req.params.id);
+        const query = `
+            SELECT * 
+            FROM Payments 
+            WHERE contract_id IN (
+                SELECT id 
+                FROM Contracts 
+                WHERE freelancer_id = @freelancerId
+            );
+        `;
 
         const pool = await connectDB();
         const response = await pool.request()
-                        .input("id", sql.Int, paymentId)
+                        .input("freelancerId", sql.Int, freelancerId)
+                        .query(query);
+
+        res.status(200).json(response.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal Server Error"});
+    }
+}
+
+
+const fetchAllPaymentsOfClient = async (req, res) => {
+    try {
+        const clientId = parseInt(req.params.id);
+        const query = `
+            SELECT * 
+            FROM Payments 
+            WHERE contract_id IN (
+                SELECT id 
+                FROM Contracts 
+                WHERE job_id IN (
+                    SELECT id 
+                    FROM Jobs 
+                    WHERE client_id = @clientId
+                )
+            );
+        `;
+
+
+        const pool = await connectDB();
+        const response = await pool.request()
+                        .input("clientId", sql.Int, clientId)
                         .query(query);
 
         res.status(200).json(response.recordset);
@@ -82,4 +121,4 @@ const updatePayment = async (req, res) => {
     }
 }
 
-module.exports = { initiatePayment, fetchPayment, updatePayment };
+module.exports = { initiatePayment, fetchAllPaymentsOfClient, fetchAllPaymentsOfFreelancer, updatePayment };

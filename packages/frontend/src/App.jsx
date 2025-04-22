@@ -12,10 +12,9 @@ import JobDetails from "./pages/freelancer/jobDetails";
 import PostJob from "./pages/client/postJob";
 import Account from "./pages/freelancer/account";
 import BidDetails from "./pages/freelancer/bidDetails";
-// import Contracts from "./pages/freelancer/contracts";
-// import Payments from "./pages/freelancer/payments";
-// import Reviews from "./pages/freelancer/reviews";
-// import Account from "./pages/freelancer/account";
+import Contracts from "./pages/freelancer/contracts";
+import Reviews from "./pages/freelancer/reviews";
+import Payments from "./pages/freelancer/payments";
 
 // Routes
 const router = createBrowserRouter([
@@ -27,11 +26,10 @@ const router = createBrowserRouter([
     { path: "/jobDetails", element: <JobDetails />},
     { path: "/postJob", element: <PostJob />},
     { path: "/account", element: <Account />},
-    { path: "/bidDetails/:id", element: <BidDetails />}
-    // { path: "./contracts", element: <Contracts />},
-    // { path: "./payments", element: <Payments />},
-    // { path: "./reviews", element: <Reviews />},
-    // { path: "./account", element: <Account />},
+    { path: "/bidDetails/:id", element: <BidDetails />},
+    { path: "/contracts", element: <Contracts />},
+    { path: "/reviews", element: <Reviews />},
+    { path: "/payments", element: <Payments />},
 ]);
 
 function App() {
