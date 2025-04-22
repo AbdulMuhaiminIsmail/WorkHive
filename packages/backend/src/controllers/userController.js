@@ -16,6 +16,36 @@ const fetchAllUsers = async (req, res) => {
     }
 }
 
+// Fetch client details by the contract Id
+const fetchClientByContractId = async (req, res) => {
+    try {
+        const contractId = parseInt(req.params.id);
+        const query = `
+            SELECT name, email, phone_number
+            FROM users
+            WHERE id = (
+                SELECT client_id 
+                FROM jobs
+                WHERE id = (
+                    SELECT job_id 
+                    FROM contracts
+                    WHERE id = @contractId
+                )
+            );
+        `;
+
+        const pool = await connectDB();
+        const response = await pool.request()
+                        .input("contractId", sql.Int, contractId)
+                        .query(query);  
+
+        res.status(200).json(response.recordset);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal Server Error"});
+    }
+}
+
 // Fetch a user by ID
 const fetchUser = async (req, res) => {
     try {
@@ -89,4 +119,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = { fetchAllUsers, fetchUser, updateUser, deleteUser }
+module.exports = { fetchClientByContractId, fetchAllUsers, fetchUser, updateUser, deleteUser }

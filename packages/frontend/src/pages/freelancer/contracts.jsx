@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Dialog, DialogTitle, DialogActions, DialogContent, Slider, TextField, Button, Paper, Box, Divider, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import {
+    AppBar, Toolbar, Typography, Dialog, DialogTitle, DialogActions,
+    DialogContent, Slider, TextField, Button, Paper, Box,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow
+} from "@mui/material";
 import axios from "axios";
 
 const Contracts = () => {
@@ -15,6 +19,10 @@ const Contracts = () => {
     const [contracts, setContracts] = useState([]);
     const [feedback, setFeedback] = useState("");
     const [rating, setRating] = useState(3);
+
+    // New state for client details dialog
+    const [contactDialogOpen, setContactDialogOpen] = useState(false);
+    const [selectedClient, setSelectedClient] = useState({ name: "", email: "", phone: "" });
 
     useEffect(() => {
         const fetchContracts = async () => {
@@ -42,6 +50,10 @@ const Contracts = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
+            await axios.put(`http://localhost:5000/payments/${contractId}`, { status: 'Paid' }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setContracts(prev =>
                 prev.map(contract =>
                     contract.id === contractId ? { ...contract, status: 'Completed' } : contract
@@ -58,7 +70,11 @@ const Contracts = () => {
     const handleCancelContract = async (contractId) => {
         try {
             await axios.put(`http://localhost:5000/contracts/${contractId}`, { status: 'Cancelled' }, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            await axios.put(`http://localhost:5000/payments/${contractId}`, { status: 'Failed' }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             setContracts(prev =>
@@ -87,9 +103,27 @@ const Contracts = () => {
         }
     };
 
+    // Function to view contact details
+    const handleViewDetails = async (contractId) => {
+        const response = await axios.get(`http://localhost:5000/users/fetchClientByContractId/${contractId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        console.log(response);
+
+        const client = {
+            name: response.data[0].name,
+            email: response.data[0].email,
+            phone: response.data[0].phone_number
+        }
+
+        setSelectedClient(client);
+        setContactDialogOpen(true);
+    };
+
     return (
         <>
-            {/* Navigation Bar */}
+            {/* AppBar */}
             <AppBar position="static" sx={{ backgroundColor: "#1976D2" }}>
                 <Toolbar>
                     <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "bold" }}>
@@ -119,12 +153,13 @@ const Contracts = () => {
                                     <TableCell><b>Agreed Amount (PKR)</b></TableCell>
                                     <TableCell><b>Status</b></TableCell>
                                     {user.user_type === "Client" && <TableCell><b>Action</b></TableCell>}
+                                    {user.user_type === "Freelancer" && <TableCell><b>Contact</b></TableCell>}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {contracts.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={user.user_type === "Client" ? 5 : 4} align="center">No contracts signed yet.</TableCell>
+                                        <TableCell colSpan={5} align="center">No contracts signed yet.</TableCell>
                                     </TableRow>
                                 ) : (
                                     contracts.map((contract) => (
@@ -154,6 +189,16 @@ const Contracts = () => {
                                                             </Button>
                                                         </>
                                                     )}
+                                                </TableCell>
+                                            )}
+                                            {user.user_type === "Freelancer" && (
+                                                <TableCell>
+                                                    <Button
+                                                        variant="outlined"
+                                                        onClick={() => handleViewDetails(contract.id)}
+                                                    >   
+                                                        View Details
+                                                    </Button>
                                                 </TableCell>
                                             )}
                                         </TableRow>
@@ -194,6 +239,19 @@ const Contracts = () => {
                 <DialogActions>
                     <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
                     <Button onClick={handleSubmitReview} color="primary" variant="contained">Submit</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Contact Dialog */}
+            <Dialog open={contactDialogOpen} onClose={() => setContactDialogOpen(false)}>
+                <DialogTitle>Client Details</DialogTitle>
+                <DialogContent>
+                    <Typography><strong>Name:</strong> {selectedClient.name}</Typography>
+                    <Typography><strong>Email:</strong> {selectedClient.email}</Typography>
+                    <Typography><strong>Phone:</strong> {selectedClient.phone}</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setContactDialogOpen(false)}>Close</Button>
                 </DialogActions>
             </Dialog>
         </>

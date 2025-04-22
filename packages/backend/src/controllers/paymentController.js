@@ -83,7 +83,7 @@ const initiatePayment = async (req, res) => {
 
 const updatePayment = async (req, res) => {
     try {
-        const paymentId = parseInt(req.params.id);
+        const contractId = parseInt(req.params.id);
         const updates = req.body;
 
         if (!updates || Object.keys(updates).length === 0) {
@@ -107,11 +107,11 @@ const updatePayment = async (req, res) => {
         // Remove the trailing comma and space
         query = query.slice(0, -2)
 
-        query += " WHERE id = @id;";
+        query += " WHERE contract_id = @contractId;";
 
         const request = pool.request();
         params.forEach(param => request.input(param.name, param.type, param.value));
-        request.input("id", sql.Int, paymentId);
+        request.input("contractId", sql.Int, contractId);
         await request.query(query);
 
         res.status(200).json({message: "Payment updated successfully!"});
