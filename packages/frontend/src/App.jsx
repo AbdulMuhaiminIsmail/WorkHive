@@ -18,8 +18,8 @@ import Payments from "./pages/freelancer/payments";
 
 // Routes
 const router = createBrowserRouter([
-    { path: "/", element: <Register /> },
-    { path: "/login", element: <Login />},
+    { path: "/", element: <Login /> },
+    { path: "/register", element: <Register />},
     { path: "/home", element: <Home />}, 
     { path: "/bids", element: <Bids />},
     { path: "/bid", element: <Bid />},

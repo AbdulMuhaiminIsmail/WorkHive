@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, Box, Avatar, Paper, IconButton } from "@mui/material";
 import { Star, Edit } from "@mui/icons-material";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Account = () => {
     const location = useLocation();
@@ -8,9 +10,55 @@ const Account = () => {
     const user = location.state?.user;
     const token = location.state?.token;
 
+    const [avgRating, setAvgRating] = useState(0.0);
+    const [jobsCount, setJobsCount] = useState(0);
+    const [listedSkills, setListedSkills] = useState([]);
+
     console.log(user);
 
-    const isCurrentUser = true; // Replace with actual logic if needed
+    useEffect(() => {
+        const fetchAvgRating = async (userId) => {
+            try {
+                const response = await axios.get(`http://localhost:5000/users/avgRating/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                setAvgRating(response.data.avgRating[0].avgRating);
+            } catch (err) {
+                console.error("Error fetching average rating", err);
+            }
+        };
+
+        const fetchJobsCount = async (userId) => {
+            try {
+                const response = (user.user_type === "Freelancer") ? await axios.get(`http://localhost:5000/users/freelancerJobsCount/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                }) : await axios.get(`http://localhost:5000/user/clientJobsCount/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                console.log(response);
+                setJobsCount(response.data.jobsCount[0].jobsCount);
+            } catch (err) {
+                console.error("Error fetching jobs count", err);
+            }
+        };
+
+        const fetchListedSkills = async (userId) => {
+            try {
+                const response = await axios.get(`http://localhost:5000/users/listedSkills/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                console.log(response);
+                setListedSkills(response.data.listedSkills);
+            } catch (err) {
+                console.error("Error fetching listed skills", err);
+            }
+        };
+
+        fetchAvgRating(user.id);
+        fetchJobsCount(user.id);
+        fetchListedSkills(user.id);
+
+    }, [user.id, token]);
 
     return (
         <>
@@ -37,12 +85,12 @@ const Account = () => {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 3, marginBottom: 4 }}>
                         <Avatar sx={{ width: 120, height: 120, backgroundColor: "#ddd" }} />
                         <Box>
-                            {/* <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+                            <Typography variant="h4" sx={{ fontWeight: "bold" }}>
                                 {user.name}{" "}
                                 <span style={{ fontSize: "1rem", color: "#666" }}>
-                                    ({user.avg_rating} <Star sx={{ color: "gold", fontSize: "1rem" }} />)
+                                    ({avgRating.toFixed(1) || "Error fetching average rating"} <Star sx={{ color: "gold", fontSize: "1rem" }} />)
                                 </span>
-                            </Typography> */}
+                            </Typography>
                             <Typography variant="subtitle1" sx={{ color: "#666" }}>
                                 {user.title || "No title provided"}
                             </Typography>
@@ -51,7 +99,6 @@ const Account = () => {
 
                     {/* User Details */}
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {isCurrentUser && (
                             <>
                                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                                     <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Email:</Typography>
@@ -66,22 +113,21 @@ const Account = () => {
                                     <Typography variant="body1">{user.phone_number}</Typography>
                                 </Box>
                             </>
-                        )}
 
                         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                             <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Bio:</Typography>
                             <Typography variant="body1" sx={{ maxWidth: "70%", textAlign: "right" }}>{user.biography || "No bio provided"}</Typography>
                         </Box>
 
-                        {/* <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                             <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Skills:</Typography>
-                            <Typography variant="body1">{user.skills || "No skills listed"}</Typography>
+                            <Typography variant="body1">{listedSkills || "No skills listed"}</Typography>
                         </Box>
 
                         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                             <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Jobs Completed:</Typography>
-                            <Typography variant="body1">{user.jobs_count}</Typography>
-                        </Box> */}
+                            <Typography variant="body1">{jobsCount || "Error fetching jobs count"}</Typography>
+                        </Box>
 
                         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                             <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Joined On:</Typography>
