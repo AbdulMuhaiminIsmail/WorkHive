@@ -42,7 +42,8 @@ const loginUser = async (req, res) => {
                 "biography": user.biography,
                 "profile_picture_url": user.profile_picture_url,
                 "user_type": user.user_type,
-                "created_at": user.created_at
+                "created_at": user.created_at,
+                "credits": user.credits
             },
             token
         });

@@ -25,7 +25,7 @@ const Contracts = () => {
     const [selectedClient, setSelectedClient] = useState({ name: "", email: "", phone: "" });
 
     useEffect(() => {
-        const fetchContracts = async () => {
+         const fetchContracts = async () => {
             try {
                 const endpoint = user.user_type === "Freelancer"
                     ? `http://localhost:5000/contracts/freelancer/${user.id}`
@@ -35,32 +35,46 @@ const Contracts = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                setContracts(contractsResponse.data);
+                const contractsData = contractsResponse.data;
+  
+                setContracts(contractsData);
             } catch (err) {
-                console.error("Error fetching data:", err);
+                console.error("Error fetching contracts or related data:", err);
             }
         };
 
         fetchContracts();
     }, [token, user]);
 
-    const handleCompleteContract = async (contractId) => {
+    const handleCompleteContract = async (contract) => {
         try {
-            await axios.put(`http://localhost:5000/contracts/${contractId}`, { status: 'Completed' }, {
+            // Update the contracts table
+            await axios.put(`http://localhost:5000/contracts/${contract.id}`, { status: 'Completed' }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            await axios.put(`http://localhost:5000/payments/${contractId}`, { status: 'Paid' }, {
+            // Update the payments table
+            await axios.put(`http://localhost:5000/payments/${contract.id}`, { status: 'Paid' }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // Release funds to the freelancer's wallet
+            await axios.put(`http://localhost:5000/users/${contract.freelancer_id}`, { creditsAdd: contract.agreed_amount }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // Subtract funds from the client's wallet
+            await axios.put(`http://localhost:5000/users/${user.id}`, { creditsSub: contract.agreed_amount }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
             setContracts(prev =>
-                prev.map(contract =>
-                    contract.id === contractId ? { ...contract, status: 'Completed' } : contract
+                prev.map(c =>
+                    c.id === contract.id ? { ...c, status: 'Completed' } : c
                 )
             );
 
-            setContractId(contractId);
+            setContractId(contract.id);
             setOpenDialog(true);
         } catch (err) {
             console.error("Error updating contract status:", err);
@@ -176,9 +190,9 @@ const Contracts = () => {
                                                                 variant="contained"
                                                                 color="success"
                                                                 sx={{ mr: 1 }}
-                                                                onClick={() => handleCompleteContract(contract.id)}
+                                                                onClick={() => handleCompleteContract(contract)}
                                                             >
-                                                                Mark Completed
+                                                                Release Funds
                                                             </Button>
                                                             <Button
                                                                 variant="outlined"

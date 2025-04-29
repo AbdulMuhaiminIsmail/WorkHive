@@ -164,7 +164,10 @@ const updateJob = async (req, res) => {
 const deleteJob = async (req, res) => {
     try {
         const jobId = req.params.id;
-        const query = "DELETE FROM Jobs WHERE id = @id";
+        const query = `
+            DELETE FROM Contracts WHERE job_id = @id
+            DELETE FROM Jobs WHERE id = @id
+        `;
 
         const pool = await connectDB();
         await pool.request()

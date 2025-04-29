@@ -1,4 +1,29 @@
 const { sql, connectDB } = require("../config/db");
+const { param } = require("../routes/userRoutes");
+
+// Fetch user credits
+const fetchCredits = async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const query = `
+            SELECT credits 
+            FROM Users
+            WHERE id = @id;
+        `;
+
+        const pool = await connectDB();
+        const response = await pool.request()
+                        .input("id", sql.Int, userId)
+                        .query(query);
+
+        res.status(200).json({
+            credits: response.recordset
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: "Internal Server Error"})
+    }
+}
 
 // Fetch jobs count of a freelancer
 const fetchFreelancerJobsCount = async (req, res) => {
@@ -35,7 +60,7 @@ const fetchClientJobsCount = async (req, res) => {
                 SELECT id 
                 FROM Jobs
                 WHERE client_id = @clientId
-            )
+            ) AND status = 'Completed';
         `;
 
         const pool = await connectDB();
@@ -189,7 +214,32 @@ const updateUser = async (req, res) => {
         }
         
         const pool = await connectDB();
+        const request = pool.request();
+
         let query = "UPDATE Users SET ";
+        let flag = false;
+        let value = 0;
+
+        Object.keys(updates).forEach((key) => {
+            if (key === "creditsAdd" || key === "creditsSub") {
+                flag = true;
+                value = updates[key];
+
+                (key === "creditsAdd")
+                ? query += "credits = credits + @value"
+                : query += "credits = credits - @value";
+
+                query += " WHERE id = @id;";
+            }
+        });
+
+        if (flag) {
+            request.input("value", sql.Int, value);
+            request.input("id", sql.Int, userId);
+            await request.query(query);
+            return res.status(200).json({message: "User credits updated successfully!"});
+        }
+
         let params = [];
 
         // Creating dynamic query for any number of params
@@ -203,7 +253,6 @@ const updateUser = async (req, res) => {
 
         query += " WHERE id = @id;";
 
-        const request = pool.request();
         params.forEach(param => request.input(param.name, param.type, param.value));
         request.input("id", sql.Int, userId);
         await request.query(query);
@@ -219,18 +268,22 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const query = "DELETE FROM Users WHERE id = @id"
+        const query = `
+            DELETE FROM Contracts WHERE freelancer_id = @id OR job_id IN (SELECT id FROM Jobs WHERE client_id = @id)
+            DELETE FROM Jobs WHERE client_id = @id
+            DELETE FROM Users WHERE id = @id
+        `;
 
         const pool = await connectDB();
         await pool.request()
             .input("id", sql.Int, userId)
             .query(query)
 
-        res.status(200).json({message: "User deleted successfully!"});
+        res.status(200).json({message: "User deleted with his jobs, contracts, bids, payments and reviews successfully!"});
     } catch (err) {
         console.error(err);
         res.status(500).json({error: "Internal Server Error"});
     }
 }
 
-module.exports = { fetchClientJobsCount, fetchFreelancerJobsCount, fetchAvgRating, fetchListedSkills, fetchClientByContractId, fetchAllUsers, fetchUser, updateUser, deleteUser }
+module.exports = { fetchCredits, fetchClientJobsCount, fetchFreelancerJobsCount, fetchAvgRating, fetchListedSkills, fetchClientByContractId, fetchAllUsers, fetchUser, updateUser, deleteUser }

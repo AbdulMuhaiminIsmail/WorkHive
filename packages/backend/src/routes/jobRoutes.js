@@ -4,7 +4,7 @@ const { verifyToken } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/:id", verifyToken, fetchAllJobsByClient); // display all jobs by client
+router.get("/jobsByClient/:id", verifyToken, fetchAllJobsByClient); // display all jobs by client
 router.get("/", verifyToken, fetchAllJobs); // display all jobs
 router.post("/byids", verifyToken, fetchJobsByIds); // display all jobs by id
 router.post("/", verifyToken, createJob);

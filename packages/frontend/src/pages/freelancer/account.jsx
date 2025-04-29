@@ -10,11 +10,10 @@ const Account = () => {
     const user = location.state?.user;
     const token = location.state?.token;
 
-    const [avgRating, setAvgRating] = useState(0.0);
+    const [credits, setCredits] = useState(0);
     const [jobsCount, setJobsCount] = useState(0);
+    const [avgRating, setAvgRating] = useState(0.0);
     const [listedSkills, setListedSkills] = useState([]);
-
-    console.log(user);
 
     useEffect(() => {
         const fetchAvgRating = async (userId) => {
@@ -32,7 +31,7 @@ const Account = () => {
             try {
                 const response = (user.user_type === "Freelancer") ? await axios.get(`http://localhost:5000/users/freelancerJobsCount/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
-                }) : await axios.get(`http://localhost:5000/user/clientJobsCount/${userId}`, {
+                }) : await axios.get(`http://localhost:5000/users/clientJobsCount/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 console.log(response);
@@ -47,13 +46,24 @@ const Account = () => {
                 const response = await axios.get(`http://localhost:5000/users/listedSkills/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
-                console.log(response);
                 setListedSkills(response.data.listedSkills);
             } catch (err) {
                 console.error("Error fetching listed skills", err);
             }
         };
 
+        const fetchCredits = async (userId) => {
+            try {
+                const response = await axios.get(`http://localhost:5000/users/fetchCredits/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setCredits(response.data.credits[0].credits);
+            } catch (err) {
+                console.error("Error fetching credits", err);
+            }
+        }
+
+        fetchCredits(user.id);
         fetchAvgRating(user.id);
         fetchJobsCount(user.id);
         fetchListedSkills(user.id);
@@ -132,6 +142,11 @@ const Account = () => {
                         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                             <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Joined On:</Typography>
                             <Typography variant="body1">{new Date(user.created_at).toLocaleDateString()}</Typography>
+                        </Box>
+
+                        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                            <Typography variant="body1" sx={{ fontWeight: "bold", color: "#444" }}>Credits:</Typography>
+                            <Typography variant="body1">{credits || "Error fetching user creditsi"}</Typography>
                         </Box>
                     </Box>
                 </Paper>

@@ -1,5 +1,5 @@
 const express = require("express");
-const { fetchClientByContractId, fetchAllUsers, fetchUser, updateUser, deleteUser, fetchFreelancerJobsCount, fetchClientJobsCount, fetchAvgRating, fetchListedSkills } = require("../controllers/userController");
+const { fetchCredits, fetchClientByContractId, fetchAllUsers, fetchUser, updateUser, deleteUser, fetchFreelancerJobsCount, fetchClientJobsCount, fetchAvgRating, fetchListedSkills } = require("../controllers/userController");
 const { verifyToken } = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -13,5 +13,6 @@ router.get("/clientJobsCount/:id", verifyToken, fetchClientJobsCount);
 router.get("/avgRating/:id", verifyToken, fetchAvgRating);
 router.get("/listedSkills/:id", verifyToken, fetchListedSkills);
 router.get("/fetchClientByContractId/:id", verifyToken, fetchClientByContractId)
+router.get("/fetchCredits/:id", verifyToken, fetchCredits);
 
 module.exports = router;
