@@ -2,11 +2,6 @@ const { sql, connectDB } = require('../config/db');
 
 const placeBid = async (req, res) => {
     try {
-        const query = `
-            INSERT INTO Bids (job_id, freelancer_id, bid_amount, cover_letter)
-            VALUES (@jobId, @freelancerId, @bidAmount, @coverLetter);
-        `;
-
         const bidData = req.body;
         const { jobId, freelancerId, bidAmount, coverLetter } = bidData;
 
@@ -16,7 +11,7 @@ const placeBid = async (req, res) => {
             .input("freelancerId", sql.Int, freelancerId)
             .input("bidAmount", sql.Decimal(10, 2), bidAmount)
             .input("coverLetter", sql.NVarChar(sql.MAX), coverLetter)
-            .query(query);
+            .query("EXEC sp_PlaceBid @jobId, @freelancerId, @bidAmount, @coverLetter");
 
         res.status(200).json({message: "Bid placed successfully"});
     } catch (err) {
@@ -28,12 +23,11 @@ const placeBid = async (req, res) => {
 const fetchBid = async (req, res) => {
     try {
         const bidId = parseInt(req.params.id);
-        const query = "SELECT * FROM Bids WHERE id = @id";
 
         const pool = await connectDB();
         const response = await pool.request()
                             .input("id", sql.Int, bidId)
-                            .query(query);
+                            .query("EXEC sp_GetBidById @id");
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -45,12 +39,11 @@ const fetchBid = async (req, res) => {
 const deleteBid = async (req, res) => {
     try {
         const bidId = parseInt(req.params.id);
-        const query = "DELETE FROM Bids WHERE id = @id";
 
         const pool = await connectDB();
         await pool.request()
             .input("id", sql.Int, bidId)
-            .query(query);
+            .query("EXEC sp_DeleteBid @id");
 
         res.status(200).json({message: "Bid deleted successfully"});
     } catch (err) {
@@ -62,12 +55,11 @@ const deleteBid = async (req, res) => {
 const fetchAllBidsByFreelancer = async (req, res) => {
     try {
         const freelancerId = parseInt(req.params.id);
-        const query = "SELECT * FROM Bids WHERE freelancer_id = @freelancerId";
 
         const pool = await connectDB();
         const response = await pool.request()
                             .input("freelancerId", sql.Int, freelancerId)
-                            .query(query);
+                            .query("EXEC sp_GetBidsByFreelancer @freelancerId");
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -79,12 +71,11 @@ const fetchAllBidsByFreelancer = async (req, res) => {
 const fetchAllBidsOnJob = async (req, res) => {
     try {
         const jobId = parseInt(req.params.id);
-        const query = "SELECT * FROM Bids WHERE job_id = @jobId";
 
         const pool = await connectDB();
         const response = await pool.request()
                             .input("jobId", sql.Int, jobId)
-                            .query(query);
+                            .query("EXEC sp_GetBidsByJob @jobId");
 
         res.status(200).json(response.recordset);
     } catch (err) {

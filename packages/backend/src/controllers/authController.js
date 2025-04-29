@@ -5,7 +5,6 @@ const { generateToken } = require("../utils/jwtUtils");
 // Login the user
 const loginUser = async (req, res) => {
     try {
-        const query = `SELECT * FROM Users WHERE email = @email`;
         const { email, password } = req.body;
     
         if (!email || !password) {
@@ -15,7 +14,7 @@ const loginUser = async (req, res) => {
         const pool = await connectDB();
         const result = await pool.request()
                         .input("email", sql.NVarChar(100), email)
-                        .query(query);
+                        .query("EXEC sp_GetUserByEmail @email");
                      
         if (result.recordset.length === 0) {
             return res.status(401).json({error: "Email or password is incorrect!"});
@@ -56,11 +55,6 @@ const loginUser = async (req, res) => {
 // Register a new user
 const registerUser = async (req, res) => {
     try {
-        const query = `
-            INSERT INTO Users (name, title, email, pass_hash, cnic, phone_number, biography, profile_picture_url, user_type)
-            VALUES (@name, @title, @email, @pass_hash, @cnic, @phone_number, @biography, @profile_picture_url, @user_type)
-        `;
-
         const { name, title, email, password, cnic, phoneNumber, biography, profile_picture_url, userType } = req.body;
 
         const salt = await bcryptjs.genSalt(10);
@@ -77,7 +71,7 @@ const registerUser = async (req, res) => {
             .input("biography", sql.NVarChar(sql.MAX), biography)
             .input("profile_picture_url", sql.NVarChar(sql.MAX), profile_picture_url)
             .input("user_type", sql.NVarChar(10), userType)
-            .query(query);
+            .query("EXEC sp_RegisterUser @name, @title, @email, @pass_hash, @cnic, @phone_number, @biography, @profile_picture_url, @user_type");
 
         res.status(200).json({message: "User registered successfully!"});
         console.log("User registered successfully!");

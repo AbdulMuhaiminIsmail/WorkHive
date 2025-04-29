@@ -3,13 +3,10 @@ const { sql, connectDB } = require('../config/db');
 const fetchAllContractsOfFreelancer = async (req, res) => {
     try {
         const freelancerId = req.params.id;
-        const query = `SELECT * FROM Contracts 
-                       WHERE freelancer_id = @freelancerId`;
-
         const pool = await connectDB();
         const response = await pool.request()
                             .input("freelancerId", sql.Int, freelancerId)
-                            .query(query);
+                            .query("EXEC sp_GetContractsByFreelancer @freelancerId");
 
         res.status(200).json(response.recordset);
         console.log(response.recordset);
@@ -22,16 +19,10 @@ const fetchAllContractsOfFreelancer = async (req, res) => {
 const fetchAllContractsOfClient = async (req, res) => {
     try {
         const clientId = req.params.id;
-        const query = `SELECT * FROM Contracts
-                       WHERE job_id IN (
-                            SELECT id FROM Jobs
-                            WHERE client_id = @clientId
-                       )`;
-
         const pool = await connectDB();
         const response = await pool.request()
                             .input("clientId", sql.Int, clientId)
-                            .query(query);
+                            .query("EXEC sp_GetContractsByClient @clientId");
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -43,12 +34,10 @@ const fetchAllContractsOfClient = async (req, res) => {
 const fetchContract = async (req, res) => {
     try {
         const contractId = req.params.id;
-        const query = "SELECT * FROM Contracts WHERE id = @id";
-
         const pool = await connectDB();
         const response = await pool.request()
                             .input("id", sql.Int, contractId)
-                            .query(query);
+                            .query("EXEC sp_GetContractById @id");
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -59,12 +48,6 @@ const fetchContract = async (req, res) => {
 
 const createContract = async (req, res) => {
     try {
-        const query = `
-            INSERT INTO Contracts (job_id, freelancer_id, agreed_amount)
-            OUTPUT INSERTED.id
-            VALUES (@jobId, @freelancerId, @agreedAmount);
-        `;
-
         const contractData = req.body;
         const { jobId, freelancerId, agreedAmount } = contractData;
 
@@ -73,7 +56,7 @@ const createContract = async (req, res) => {
             .input("jobId", sql.Int, jobId)
             .input("freelancerId", sql.Int, freelancerId)
             .input("agreedAmount", sql.Decimal(10, 2), agreedAmount)
-            .query(query);
+            .query("EXEC sp_CreateContract @jobId, @freelancerId, @agreedAmount");
         
         const id = response.recordset[0].id;
 
@@ -97,24 +80,19 @@ const updateContract = async (req, res) => {
         }
         
         const pool = await connectDB();
-        let query = "UPDATE Contracts SET ";
+        const request = pool.request();
+        
+        // Build dynamic parameters
         let params = [];
-
-        // Creating dynamic query for any number of params
         Object.keys(updates).forEach((key, index) => {
-            query += `${key} = @param${index}, `;
-            params.push({name: `param${index}`, type: sql.NVarChar(10), value: updates[key]});
+            request.input(`param${index}`, sql.NVarChar(sql.MAX), updates[key]);
+            params.push(`${key} = @param${index}`);
         });
 
-        // Remove the trailing comma and space
-        query = query.slice(0, -2)
-
-        query += " WHERE id = @id;";
-
-        const request = pool.request();
-        params.forEach(param => request.input(param.name, param.type, param.value));
-        request.input("id", sql.Int, contractId);
-        await request.query(query);
+        const paramString = params.join(', ');
+        await request
+            .input("id", sql.Int, contractId)
+            .query(`EXEC sp_UpdateContract @id, @updates='${paramString}'`);
 
         res.status(200).json({message: "Contract updated successfully!"});
     } catch (err) {

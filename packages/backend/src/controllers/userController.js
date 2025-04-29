@@ -1,20 +1,13 @@
 const { sql, connectDB } = require("../config/db");
-const { param } = require("../routes/userRoutes");
 
 // Fetch user credits
 const fetchCredits = async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const query = `
-            SELECT credits 
-            FROM Users
-            WHERE id = @id;
-        `;
-
         const pool = await connectDB();
         const response = await pool.request()
                         .input("id", sql.Int, userId)
-                        .query(query);
+                        .query("EXEC sp_GetUserCredits @id");
 
         res.status(200).json({
             credits: response.recordset
@@ -29,16 +22,10 @@ const fetchCredits = async (req, res) => {
 const fetchFreelancerJobsCount = async (req, res) => {
     try {
         const freelancerId = parseInt(req.params.id);
-        const query = `
-            SELECT COUNT (*) AS jobsCount
-            FROM Contracts 
-            WHERE freelancer_id = @freelancerId AND status = 'Completed';
-        `;
-
         const pool = await connectDB();
         const response = await pool.request()
                         .input("freelancerId", sql.Int, freelancerId)
-                        .query(query);  
+                        .query("EXEC sp_GetFreelancerJobsCount @freelancerId");  
 
         res.status(200).json({
             jobsCount: response.recordset ?? 0
@@ -53,20 +40,10 @@ const fetchFreelancerJobsCount = async (req, res) => {
 const fetchClientJobsCount = async (req, res) => {
     try {
         const clientId = parseInt(req.params.id);
-        const query = `
-            SELECT COUNT (*) AS jobsCount
-            FROM Contracts 
-            WHERE job_id IN (
-                SELECT id 
-                FROM Jobs
-                WHERE client_id = @clientId
-            ) AND status = 'Completed';
-        `;
-
         const pool = await connectDB();
         const response = await pool.request()
                         .input("clientId", sql.Int, clientId)
-                        .query(query);  
+                        .query("EXEC sp_GetClientJobsCount @clientId");  
 
         res.status(200).json({
             jobsCount: response.recordset ?? 0
@@ -77,30 +54,19 @@ const fetchClientJobsCount = async (req, res) => {
     }
 }
 
-// Fetch average rating of a freelancer using nested subqueries
+// Fetch average rating of a freelancer
 const fetchAvgRating = async (req, res) => {
     try {
         const freelancerId = parseInt(req.params.id);
-
-        const query = `
-            SELECT AVG(CAST(rating AS FLOAT)) AS avgRating
-            FROM Reviews
-            WHERE contract_id IN (
-                SELECT id
-                FROM Contracts
-                WHERE freelancer_id = @freelancerId
-            );
-        `;
-
         const pool = await connectDB();
         const result = await pool.request()
             .input("freelancerId", sql.Int, freelancerId)
-            .query(query);
+            .query("EXEC sp_GetFreelancerAvgRating @freelancerId");
 
         const avgRating = result.recordset;
 
         res.status(200).json({
-            avgRating: avgRating ?? 0 // Return 0 if no reviews found
+            avgRating: avgRating ?? 0
         });
     } catch (err) {
         console.error("Error fetching average rating:", err);
@@ -108,25 +74,14 @@ const fetchAvgRating = async (req, res) => {
     }
 };
 
-// Fetch all listed skills of a user by user ID
+// Fetch all listed skills of a user
 const fetchListedSkills = async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-
-        const query = `
-            SELECT name
-            FROM Skills
-            WHERE id IN (
-                SELECT skill_id
-                FROM User_Skills
-                WHERE user_id = @userId
-            );
-        `;
-
         const pool = await connectDB();
         const result = await pool.request()
             .input("userId", sql.Int, userId)
-            .query(query);
+            .query("EXEC sp_GetUserSkills @userId");
 
         const skills = result.recordset.map(row => row.name);
 
@@ -142,11 +97,9 @@ const fetchListedSkills = async (req, res) => {
 // Fetch all users
 const fetchAllUsers = async (req, res) => {
     try {
-        const query = "SELECT * FROM Users";
-
         const pool = await connectDB();
         const response = await pool.request()
-                        .query(query);  
+                        .query("EXEC sp_GetAllUsers");  
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -155,28 +108,14 @@ const fetchAllUsers = async (req, res) => {
     }
 }
 
-// Fetch client details by the contract Id
+// Fetch client details by contract Id
 const fetchClientByContractId = async (req, res) => {
     try {
         const contractId = parseInt(req.params.id);
-        const query = `
-            SELECT name, email, phone_number
-            FROM users
-            WHERE id = (
-                SELECT client_id 
-                FROM jobs
-                WHERE id = (
-                    SELECT job_id 
-                    FROM contracts
-                    WHERE id = @contractId
-                )
-            );
-        `;
-
         const pool = await connectDB();
         const response = await pool.request()
                         .input("contractId", sql.Int, contractId)
-                        .query(query);  
+                        .query("EXEC sp_GetClientByContractId @contractId");  
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -189,12 +128,10 @@ const fetchClientByContractId = async (req, res) => {
 const fetchUser = async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const query = "SELECT * FROM Users WHERE id = @id";
-
         const pool = await connectDB();
         const response = await pool.request()
                         .input("id", sql.Int, userId)
-                        .query(query);  
+                        .query("EXEC sp_GetUserById @id");  
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -216,46 +153,30 @@ const updateUser = async (req, res) => {
         const pool = await connectDB();
         const request = pool.request();
 
-        let query = "UPDATE Users SET ";
-        let flag = false;
-        let value = 0;
-
-        Object.keys(updates).forEach((key) => {
-            if (key === "creditsAdd" || key === "creditsSub") {
-                flag = true;
-                value = updates[key];
-
-                (key === "creditsAdd")
-                ? query += "credits = credits + @value"
-                : query += "credits = credits - @value";
-
-                query += " WHERE id = @id;";
-            }
-        });
-
-        if (flag) {
-            request.input("value", sql.Int, value);
-            request.input("id", sql.Int, userId);
-            await request.query(query);
+        if (updates.creditsAdd || updates.creditsSub) {
+            const value = updates.creditsAdd || updates.creditsSub;
+            const isAdd = updates.creditsAdd ? 1 : 0;
+            
+            await request
+                .input("userId", sql.Int, userId)
+                .input("value", sql.Int, value)
+                .input("isAdd", sql.Bit, isAdd)
+                .query("EXEC sp_UpdateUserCredits @userId, @value, @isAdd");
+                
             return res.status(200).json({message: "User credits updated successfully!"});
         }
 
+        // For other updates
         let params = [];
-
-        // Creating dynamic query for any number of params
         Object.keys(updates).forEach((key, index) => {
-            query += `${key} = @param${index}, `;
-            params.push({name: `param${index}`, type: sql.NVarChar, value: updates[key]});
+            request.input(`param${index}`, sql.NVarChar(sql.MAX), updates[key]);
+            params.push(`${key} = @param${index}`);
         });
 
-        // Remove the trailing comma and space
-        query = query.slice(0, -2)
-
-        query += " WHERE id = @id;";
-
-        params.forEach(param => request.input(param.name, param.type, param.value));
-        request.input("id", sql.Int, userId);
-        await request.query(query);
+        const paramString = params.join(', ');
+        await request
+            .input("id", sql.Int, userId)
+            .query(`EXEC sp_UpdateUser @id, @updates='${paramString}'`);
 
         res.status(200).json({message: "User updated successfully!"});
     } catch (err) {
@@ -268,16 +189,10 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const userId = parseInt(req.params.id);
-        const query = `
-            DELETE FROM Contracts WHERE freelancer_id = @id OR job_id IN (SELECT id FROM Jobs WHERE client_id = @id)
-            DELETE FROM Jobs WHERE client_id = @id
-            DELETE FROM Users WHERE id = @id
-        `;
-
         const pool = await connectDB();
         await pool.request()
             .input("id", sql.Int, userId)
-            .query(query)
+            .query("EXEC sp_DeleteUser @id");
 
         res.status(200).json({message: "User deleted with his jobs, contracts, bids, payments and reviews successfully!"});
     } catch (err) {
@@ -286,4 +201,4 @@ const deleteUser = async (req, res) => {
     }
 }
 
-module.exports = { fetchCredits, fetchClientJobsCount, fetchFreelancerJobsCount, fetchAvgRating, fetchListedSkills, fetchClientByContractId, fetchAllUsers, fetchUser, updateUser, deleteUser }
+module.exports = { fetchCredits, fetchClientJobsCount, fetchFreelancerJobsCount, fetchAvgRating, fetchListedSkills, fetchClientByContractId, fetchAllUsers, fetchUser, updateUser, deleteUser };

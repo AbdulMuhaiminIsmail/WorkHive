@@ -1,23 +1,13 @@
 const { NVarChar } = require("mssql");
-const { sql, connectDB } = require("../config/db")
+const { sql, connectDB } = require("../config/db");
 
 const fetchAllPaymentsOfFreelancer = async (req, res) => {
     try {
         const freelancerId = parseInt(req.params.id);
-        const query = `
-            SELECT * 
-            FROM Payments 
-            WHERE contract_id IN (
-                SELECT id 
-                FROM Contracts 
-                WHERE freelancer_id = @freelancerId
-            );
-        `;
-
         const pool = await connectDB();
         const response = await pool.request()
                         .input("freelancerId", sql.Int, freelancerId)
-                        .query(query);
+                        .query("EXEC sp_GetPaymentsByFreelancer @freelancerId");
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -26,29 +16,13 @@ const fetchAllPaymentsOfFreelancer = async (req, res) => {
     }
 }
 
-
 const fetchAllPaymentsOfClient = async (req, res) => {
     try {
         const clientId = parseInt(req.params.id);
-        const query = `
-            SELECT * 
-            FROM Payments 
-            WHERE contract_id IN (
-                SELECT id 
-                FROM Contracts 
-                WHERE job_id IN (
-                    SELECT id 
-                    FROM Jobs 
-                    WHERE client_id = @clientId
-                )
-            );
-        `;
-
-
         const pool = await connectDB();
         const response = await pool.request()
                         .input("clientId", sql.Int, clientId)
-                        .query(query);
+                        .query("EXEC sp_GetPaymentsByClient @clientId");
 
         res.status(200).json(response.recordset);
     } catch (err) {
@@ -59,20 +33,14 @@ const fetchAllPaymentsOfClient = async (req, res) => {
 
 const initiatePayment = async (req, res) => {
     try {
-        const query = `
-            INSERT INTO Payments (contract_id, amount) 
-            VALUES (@contractId, @amount);
-        `;
-
         const paymentData = req.body;
-        
         const pool = await connectDB();
         const { contractId, amount } = paymentData;
 
         await pool.request()
             .input("contractId", sql.Int, contractId)
             .input("amount", sql.Decimal(10, 2), amount)
-            .query(query);
+            .query("EXEC sp_CreatePayment @contractId, @amount");
 
         res.status(200).json({message: "Payment created successfully!"});
     } catch (err) {
@@ -91,28 +59,20 @@ const updatePayment = async (req, res) => {
         }
         
         const pool = await connectDB();
-        let query = "UPDATE Payments SET ";
+        const request = pool.request();
+        
+        // Build dynamic parameters
         let params = [];
-
-        // Creating dynamic query for any number of params with different data types
         Object.keys(updates).forEach((key, index) => {
-            query += `${key} = @param${index}, `;
-            let type;
-            if (key == "status") {
-                type = NVarChar(8);
-            }
-            params.push({name: `param${index}`, type: type, value: updates[key]});
+            let type = key === "status" ? NVarChar(8) : sql.NVarChar(sql.MAX);
+            request.input(`param${index}`, type, updates[key]);
+            params.push(`${key} = @param${index}`);
         });
 
-        // Remove the trailing comma and space
-        query = query.slice(0, -2)
-
-        query += " WHERE contract_id = @contractId;";
-
-        const request = pool.request();
-        params.forEach(param => request.input(param.name, param.type, param.value));
-        request.input("contractId", sql.Int, contractId);
-        await request.query(query);
+        const paramString = params.join(', ');
+        await request
+            .input("contractId", sql.Int, contractId)
+            .query(`EXEC sp_UpdatePayment @contractId, @updates='${paramString}'`);
 
         res.status(200).json({message: "Payment updated successfully!"});
     } catch (err) {
