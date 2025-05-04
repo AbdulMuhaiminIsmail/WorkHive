@@ -2,7 +2,22 @@ import { Add as AddIcon } from "@mui/icons-material";
 import { Fab } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Button, TextField, List, ListItem, ListItemText, Paper, Box, Divider, IconButton } from "@mui/material";
+import { 
+    AppBar, 
+    Toolbar, 
+    Typography, 
+    Button, 
+    TextField, 
+    List, 
+    ListItem, 
+    ListItemText, 
+    Paper, 
+    Box, 
+    Divider, 
+    IconButton,
+    Chip,
+    Avatar
+} from "@mui/material";
 import { Delete, Edit, ArrowForward } from "@mui/icons-material";
 import axios from "axios";
 
@@ -30,8 +45,8 @@ const Home = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const user = location.state?.user // || JSON.parse(localStorage.getItem("user"));
-    const token = location.state?.token // || localStorage.getItem("token");
+    const user = location.state?.user;
+    const token = location.state?.token;
 
     const [jobs, setJobs] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -50,13 +65,19 @@ const Home = () => {
                             Authorization: `Bearer ${token}`,
                         }
                     });
-                setJobs(response.data);
+                
+                // Filter out expired jobs
+                const currentDate = new Date();
+                const activeJobs = response.data.filter(job => 
+                    new Date(job.deadline) > currentDate
+                );
+                setJobs(activeJobs);
             } catch (err) {
                 console.error(err);
             }
         };
         fetchJobs();
-    }, [token]);
+    }, [token, user]);
 
     const filteredJobs = jobs.filter(job =>
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -77,92 +98,311 @@ const Home = () => {
     }
 
     return (
-        <>
+        <Box sx={{ 
+            minHeight: '100vh', 
+            background: '#121212',
+            color: 'rgba(255, 255, 255, 0.9)'
+        }}>
             {/* Navigation Bar */}
-            <AppBar position="static" sx={{ backgroundColor: "#1976D2" }}>
-                <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "bold" }}>
+            <AppBar 
+                position="static" 
+                sx={{ 
+                    backgroundColor: 'rgba(32, 32, 32, 0.95)',
+                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+            >
+                <Toolbar sx={{ justifyContent: 'space-between' }}>
+                    <Typography 
+                        variant="h6" 
+                        sx={{ 
+                            fontWeight: 800,
+                            fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+                            letterSpacing: '-0.5px'
+                        }}
+                    >
                         WorkHive
                     </Typography>
-                    <Button color="inherit" onClick={() => navigate("/home", { state: { user, token } })}>Jobs</Button>
-                    {user.user_type === "Freelancer" && (<Button color="inherit" onClick={() => navigate("/bids", { state: {user, token} })}>Bids</Button>)}
-                    <Button color="inherit" onClick={() => navigate("/contracts", { state: {user, token} })}>Contracts</Button>
-                    <Button color="inherit" onClick={() => navigate("/payments", { state: {user, token} })}>Payments</Button>
-                    <Button color="inherit" onClick={() => navigate("/reviews", { state: {user, token} })}>Reviews</Button>
-                    <Button color="inherit" onClick={() => navigate("/account", { state: {user, token} })}>Account</Button>
+                    
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/home", { state: { user, token } })}
+                        >
+                            Jobs
+                        </Button>
+                        {user.user_type === "Freelancer" && (
+                            <Button 
+                                color="inherit" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                                onClick={() => navigate("/bids", { state: {user, token} })}
+                            >
+                                Bids
+                            </Button>
+                        )}
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/contracts", { state: {user, token} })}
+                        >
+                            Contracts
+                        </Button>
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/account", { state: {user, token} })}
+                        >
+                            Account
+                        </Button>
+                    </Box>
                 </Toolbar>
             </AppBar>
 
             {/* Main Content */}
-            <Box sx={{ maxWidth: 1080, margin: "auto", padding: 3 }}>
-                {/* Page Title */}
-                <Typography variant="h5" sx={{ fontWeight: "bold", textAlign: "center", marginBottom: 2 }}>
-                {user.user_type === "Freelancer" ? "Available Jobs" : "Posted Jobs"}
-                </Typography> 
-
-                {/* Search Bar */}    
-                <TextField
-                    fullWidth
-                    label="Search Jobs"
-                    variant="outlined"
-                    sx={{ marginBottom: 2 }}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                /> 
+            <Box sx={{ 
+                maxWidth: 1200, 
+                margin: 'auto', 
+                padding: 3,
+                paddingTop: 4
+            }}>
+                {/* Page Title and Search */}
+                <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    mb: 4
+                }}>
+                    <Typography 
+                        variant="h4" 
+                        sx={{ 
+                            fontWeight: 700,
+                            fontFamily: '"Inter", sans-serif',
+                            color: 'rgba(255, 255, 255, 0.9)'
+                        }}
+                    >
+                        {user.user_type === "Freelancer" ? "Available Jobs" : "Your Posted Jobs"}
+                    </Typography>
+                    
+                    <TextField
+                        fullWidth
+                        variant="filled"
+                        label="Search Jobs"
+                        sx={{ 
+                            maxWidth: 400,
+                            '& .MuiFilledInput-root': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                borderRadius: '4px',
+                                color: '#ffffff'
+                            },
+                            '& .MuiFilledInput-root:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.15)'
+                            },
+                            '& .MuiInputLabel-root': {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': {
+                                color: 'rgba(255, 255, 255, 0.9)'
+                            }
+                        }}
+                        InputProps={{
+                            disableUnderline: true
+                        }}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </Box>
 
                 {/* List of Jobs */}
-                <Paper sx={{ padding: 2, background: "#f9f9f9" }}>
-                    <List>
+                <Paper sx={{ 
+                    padding: 2, 
+                    backgroundColor: 'rgba(32, 32, 32, 0.7)',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)'
+                }}>
+                    <List sx={{ padding: 0 }}>
                         {filteredJobs.length === 0 ? (
-                            <Typography variant="body1" sx={{ textAlign: "center", padding: 2 }}>
-                                {user.user_type === "Freelancer" ? "No jobs available." : "No jobs posted."}
+                            <Typography 
+                                variant="body1" 
+                                sx={{ 
+                                    textAlign: "center", 
+                                    padding: 4,
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }}
+                            >
+                                {user.user_type === "Freelancer" 
+                                    ? "No active jobs available at the moment." 
+                                    : "You haven't posted any jobs yet."}
                             </Typography>
                         ) : (
                             filteredJobs.map((job) => (
-                                <div key={job.id}>
-                                    <ListItem alignItems="flex-start">
+                                <Box key={job.id} sx={{ mb: 2 }}>
+                                    <ListItem 
+                                        alignItems="flex-start"
+                                        sx={{
+                                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                            borderRadius: '4px',
+                                            transition: 'all 0.2s ease',
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(255, 255, 255, 0.08)'
+                                            }
+                                        }}
+                                    >
                                         <ListItemText
                                             primary={
-                                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 16px" }}>
-                                                    <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1, minWidth: 0 }}>
+                                                <Box sx={{ 
+                                                    display: "flex", 
+                                                    justifyContent: "space-between", 
+                                                    alignItems: "center"
+                                                }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                         {user.user_type !== "Freelancer" && (
-                                                            <IconButton size="small" color="primary">
-                                                                <Edit />
+                                                            <IconButton 
+                                                                size="small" 
+                                                                sx={{ 
+                                                                    color: 'rgba(255, 255, 255, 0.7)',
+                                                                    '&:hover': {
+                                                                        color: '#1d9bf0',
+                                                                        backgroundColor: 'rgba(29, 155, 240, 0.1)'
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <Edit fontSize="small" />
                                                             </IconButton>
                                                         )}
-                                                        <Typography variant="h6" sx={{ fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                        <Typography 
+                                                            variant="h6" 
+                                                            sx={{ 
+                                                                fontWeight: 600,
+                                                                color: 'rgba(255, 255, 255, 0.9)'
+                                                            }}
+                                                        >
                                                             {job.title}
                                                         </Typography>
                                                     </Box>
                                                     {user.user_type === "Freelancer" ? (
-                                                        <IconButton size="small" color="primary" onClick={() => navigate("/jobDetails", { state: { user, job, token } })}>
-                                                            <ArrowForward />
+                                                        <IconButton 
+                                                            size="small" 
+                                                            sx={{ 
+                                                                color: '#1db954',
+                                                                '&:hover': {
+                                                                    backgroundColor: 'rgba(29, 185, 84, 0.1)'
+                                                                }
+                                                            }}
+                                                            onClick={() => navigate("/jobDetails", { state: { user, job, token } })}
+                                                        >
+                                                            <ArrowForward fontSize="small" />
                                                         </IconButton>
                                                     ) : (
-                                                        <IconButton size="small" sx={{ backgroundColor: "red", color: "white" }} onClick={() => deleteJob(job.id)}>
-                                                            <Delete />
+                                                        <IconButton 
+                                                            size="small" 
+                                                            sx={{ 
+                                                                color: '#ff4444',
+                                                                '&:hover': {
+                                                                    backgroundColor: 'rgba(255, 68, 68, 0.1)'
+                                                                }
+                                                            }}
+                                                            onClick={() => deleteJob(job.id)}
+                                                        >
+                                                            <Delete fontSize="small" />
                                                         </IconButton>
                                                     )}
                                                 </Box>
                                             }
                                             secondary={
                                                 <>
-                                                    <Typography variant="body2" color="textSecondary">{timeAgo(job.posted_at)}</Typography>
-                                                    <Typography variant="body1" sx={{ marginTop: 1 }}>{truncateText(job.description)}</Typography>
+                                                    <Box sx={{ 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        gap: 1,
+                                                        mt: 1,
+                                                        mb: 1
+                                                    }}>
+                                                        <Chip 
+                                                            label={timeAgo(job.posted_at)}
+                                                            size="small"
+                                                            sx={{ 
+                                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                                color: 'rgba(255, 255, 255, 0.7)'
+                                                            }}
+                                                        />
+                                                    </Box>
+                                                    <Typography 
+                                                        variant="body1" 
+                                                        sx={{ 
+                                                            color: 'rgba(255, 255, 255, 0.8)',
+                                                            mt: 1
+                                                        }}
+                                                    >
+                                                        {truncateText(job.description)}
+                                                    </Typography>
                                                 </>
                                             }
                                         />
                                     </ListItem>
-                                    <Box sx={{ display: "flex", justifyContent: "space-between", padding: "10px 16px", alignItems: "center" }}>
-                                        <Typography variant="subtitle2" color="textSecondary"><b>Budget:</b> PKR {job.budget}</Typography>
+                                    
+                                    <Box sx={{ 
+                                        display: "flex", 
+                                        justifyContent: "space-between", 
+                                        alignItems: "center",
+                                        padding: "12px 16px",
+                                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                                        borderRadius: '0 0 4px 4px'
+                                    }}>
+                                        <Chip 
+                                            label={`Budget: PKR ${job.budget}`}
+                                            sx={{
+                                                backgroundColor: 'rgba(29, 185, 84, 0.1)',
+                                                color: '#1db954'
+                                            }}
+                                        />
+                                        
                                         {user.user_type === "Client" && (
-                                            <Button variant="contained" color="primary" onClick={() => navigate("/bids", { state: { user, job, token } })}>
+                                            <Button 
+                                                variant="contained"
+                                                sx={{
+                                                    backgroundColor: 'rgba(29, 155, 240, 0.2)',
+                                                    color: '#1d9bf0',
+                                                    fontWeight: 600,
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(29, 155, 240, 0.3)'
+                                                    }
+                                                }}
+                                                onClick={() => navigate("/bids", { state: { user, job, token } })}
+                                            >
                                                 View Bids
                                             </Button>
                                         )}
-                                        <Typography variant="subtitle2" color="textSecondary"><b>Deadline:</b> {new Date(job.deadline).toLocaleDateString()}</Typography>
+                                        
+                                        <Chip 
+                                            label={`Deadline: ${new Date(job.deadline).toLocaleDateString()}`}
+                                            sx={{
+                                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                                color: '#ffc107'
+                                            }}
+                                        />
                                     </Box>
-                                    <Divider />
-                                </div>
+                                </Box>
                             ))
                         )}
                     </List>
@@ -173,15 +413,24 @@ const Home = () => {
             {user.user_type !== "Freelancer" && (
                 <Fab 
                     color="primary" 
-                    sx={{ position: "fixed", bottom: 20, right: 20 }} 
+                    sx={{ 
+                        position: "fixed", 
+                        bottom: 32, 
+                        right: 32,
+                        backgroundColor: '#1db954',
+                        '&:hover': {
+                            backgroundColor: '#1ed760',
+                            transform: 'scale(1.05)'
+                        },
+                        transition: 'all 0.2s ease'
+                    }} 
                     onClick={() => navigate("/postJob", { state: { user, token } })}
                 >
                     <AddIcon />
                 </Fab>
             )}
-        </>
+        </Box>
     );
 };
 
 export default Home;
-
