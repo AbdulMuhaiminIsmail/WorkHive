@@ -61,7 +61,7 @@ const registerUser = async (req, res) => {
         const hashedPassword = await bcryptjs.hash(password, salt);
 
         const pool = await connectDB();
-        await pool.request()
+        const response = await pool.request()
             .input("name", sql.NVarChar(100), name)
             .input("title", sql.NVarChar(100), title)
             .input("email", sql.NVarChar(100), email)
@@ -70,10 +70,12 @@ const registerUser = async (req, res) => {
             .input("phone_number", sql.VarChar(13), phoneNumber)
             .input("biography", sql.NVarChar(sql.MAX), biography)
             .input("profile_picture_url", sql.NVarChar(sql.MAX), profile_picture_url)
-            .input("user_type", sql.NVarChar(10), userType)
-            .query("EXEC sp_RegisterUser @name, @title, @email, @pass_hash, @cnic, @phone_number, @biography, @profile_picture_url, @user_type");
+            .input("user_type", sql.NVarChar(10), userType) 
+            .output("new_user_id", sql.Int)
+            .execute("sp_RegisterUser");
 
-        res.status(200).json({message: "User registered successfully!"});
+        const newUserId = response.output.new_user_id;
+        res.status(200).json({id: newUserId, message: "User registered successfully!"});
         console.log("User registered successfully!");
     }
     catch (err) {

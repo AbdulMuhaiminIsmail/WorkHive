@@ -9,6 +9,7 @@ const bidRoutes = require("./src/routes/bidRoutes");
 const reviewRoutes = require("./src/routes/reviewRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
 const contractRoutes = require("./src/routes/contractRoutes");
+const skillRoutes = require("./src/routes/skillRoutes");
 
 const app = express();
 app.use(express.json()); 
@@ -21,6 +22,7 @@ app.use("/bids", bidRoutes);
 app.use("/reviews", reviewRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/contracts", contractRoutes);
+app.use("/skills", skillRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
