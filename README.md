@@ -1,8 +1,8 @@
-# WorkHive - A Unique Social Platform
+# WorkHive - A Freelancing Platform
 
 ## 📌 Overview
 
-WorkHive is a **full-stack social platform** designed to foster **collaboration, networking, and productivity**. Unlike traditional social media, WorkHive focuses on meaningful interactions and professional connections.
+WorkHive is a **full-stack freelancing platform** designed to foster **collaboration, networking, and productivity**. Unlike traditional freelancing websites, WorkHive focuses on meaningful interactions and professional connections.
 
 ## 🚀 Tech Stack
 

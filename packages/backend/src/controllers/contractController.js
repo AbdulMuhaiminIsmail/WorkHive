@@ -76,29 +76,32 @@ const updateContract = async (req, res) => {
         const updates = req.body;
 
         if (!updates || Object.keys(updates).length === 0) {
-            return res.status(400).json({message: "No data given for updating"});
+            return res.status(400).json({ message: "No data given for updating" });
         }
-        
+
         const pool = await connectDB();
         const request = pool.request();
-        
-        // Build dynamic parameters
-        let params = [];
+
+        // Build the SET clause with parameterized values
+        const setClauses = [];
         Object.keys(updates).forEach((key, index) => {
-            request.input(`param${index}`, sql.NVarChar(sql.MAX), updates[key]);
-            params.push(`${key} = @param${index}`);
+            const paramName = `param${index}`;
+            setClauses.push(`${key} = @${paramName}`);
+            request.input(paramName, updates[key]);
         });
 
-        const paramString = params.join(', ');
-        await request
-            .input("id", sql.Int, contractId)
-            .query(`EXEC sp_UpdateContract @id, @updates='${paramString}'`);
+        // Build the complete query
+        const query = `UPDATE Contracts SET ${setClauses.join(', ')} WHERE id = @id`;
+        request.input('id', sql.Int, contractId);
 
-        res.status(200).json({message: "Contract updated successfully!"});
+        // Execute the query
+        await request.query(query);
+
+        res.status(200).json({ message: "Contract updated successfully!" });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({error: "Internal Server Error"});
+        console.error("Error updating contract:", err);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-}
+};
 
 module.exports = { fetchContract, fetchAllContractsOfClient, fetchAllContractsOfFreelancer, createContract, updateContract };

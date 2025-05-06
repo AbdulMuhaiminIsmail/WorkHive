@@ -1,6 +1,20 @@
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Button, TextField, List, ListItem, ListItemText, Paper, Box, Divider } from "@mui/material";
+import { 
+    AppBar, 
+    Toolbar, 
+    Typography, 
+    Button, 
+    TextField, 
+    List, 
+    ListItem, 
+    ListItemText, 
+    Paper, 
+    Box, 
+    Divider,
+    Chip,
+    Avatar
+} from "@mui/material";
 
 const BidDetails = () => {
     const navigate = useNavigate();
@@ -43,48 +57,212 @@ const BidDetails = () => {
     }
 
     return (
-        <>
+        <Box sx={{ 
+            minHeight: '100vh', 
+            background: '#121212',
+            color: 'rgba(255, 255, 255, 0.9)'
+        }}>
             {/* Navigation Bar */}
-            <AppBar position="static" sx={{ backgroundColor: "#1976D2" }}>
-                <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "bold" }}>
+            <AppBar 
+                position="static" 
+                sx={{ 
+                    backgroundColor: 'rgba(32, 32, 32, 0.95)',
+                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+            >
+                <Toolbar sx={{ justifyContent: 'space-between' }}>
+                    <Typography 
+                        variant="h6" 
+                        sx={{ 
+                            fontWeight: 800,
+                            fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
+                            letterSpacing: '-0.5px'
+                        }}
+                    >
                         WorkHive
                     </Typography>
-                    <Button color="inherit" onClick={() => navigate("/home", { state: { user, token } })}>Jobs</Button>
-                    <Button color="inherit" onClick={() => navigate("/bids", { state: {user, token} })}>Bids</Button>
-                    <Button color="inherit" onClick={() => navigate("/contracts", { state: {user, token} })}>Contracts</Button>
-                    <Button color="inherit" onClick={() => navigate("/payments", { state: {user, token} })}>Payments</Button>
-                    <Button color="inherit" onClick={() => navigate("/reviews", { state: {user, token} })}>Reviews</Button>
-                    <Button color="inherit" onClick={() => navigate("/account", { state: {user, token} })}>Account</Button>
+                    
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/home", { state: { user, token } })}
+                        >
+                            Jobs
+                        </Button>
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/bids", { state: {user, token} })}
+                        >
+                            Bids
+                        </Button>
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/contracts", { state: {user, token} })}
+                        >
+                            Contracts
+                        </Button>
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/payments", { state: {user, token} })}
+                        >
+                            Payments
+                        </Button>
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/reviews", { state: {user, token} })}
+                        >
+                            Reviews
+                        </Button>
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/account", { state: {user, token} })}
+                        >
+                            Account
+                        </Button>
+                    </Box>
                 </Toolbar>
             </AppBar>
             
             {/* Bid Details Section */}
-            <Box sx={{ maxWidth: 900, margin: "auto", padding: 3 }}>
-                <Paper sx={{ padding: 3, background: "#f9f9f9" }}>
-                    <Typography variant="h4" sx={{ fontWeight: "bold", color: "#1976D2", marginBottom: 2 }}>
-                        {user.title}
+            <Box sx={{ 
+                maxWidth: 800, 
+                margin: "auto", 
+                padding: 4,
+                paddingTop: 6
+            }}>
+                <Paper sx={{ 
+                    padding: 4, 
+                    backgroundColor: 'rgba(32, 32, 32, 0.7)',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)'
+                }}>
+                    <Typography variant="h4" sx={{ 
+                        fontWeight: 700,
+                        fontFamily: '"Inter", sans-serif',
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        marginBottom: 3
+                    }}>
+                        Bid Details
                     </Typography>
-                    <Divider sx={{ marginBottom: 2 }} />                    
-                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>Bid Amount:</Typography>
-                    <Typography variant="body1" sx={{ marginBottom: 2 }}>{bid.bid_amount}</Typography>
+                    
+                    <Divider sx={{ 
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        marginBottom: 3 
+                    }} />
+                    
+                    <Box sx={{ mb: 4 }}>
+                        <Typography variant="subtitle1" sx={{ 
+                            fontWeight: 600,
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            mb: 1
+                        }}>
+                            BID AMOUNT
+                        </Typography>
+                        <Chip
+                            label={`PKR ${bid.bid_amount}`}
+                            sx={{
+                                backgroundColor: 'rgba(29, 185, 84, 0.1)',
+                                color: '#1db954',
+                                fontSize: '1.1rem',
+                                padding: 2
+                            }}
+                        />
+                    </Box>
 
-                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>Description:</Typography>
-                    <Typography variant="body1" sx={{ marginBottom: 2 }}>{bid.cover_letter}</Typography>
+                    <Box sx={{ mb: 4 }}>
+                        <Typography variant="subtitle1" sx={{ 
+                            fontWeight: 600,
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            mb: 1
+                        }}>
+                            DESCRIPTION
+                        </Typography>
+                        <Paper sx={{ 
+                            padding: 3,
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '8px'
+                        }}>
+                            <Typography variant="body1" sx={{ 
+                                color: 'rgba(255, 255, 255, 0.8)',
+                                lineHeight: 1.6
+                            }}>
+                                {bid.cover_letter}
+                            </Typography>
+                        </Paper>
+                    </Box>
 
-                    <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
+                    <Box sx={{ 
+                        display: "flex", 
+                        justifyContent: "space-between", 
+                        marginTop: 4,
+                        gap: 2
+                    }}>
                         <Button 
                             variant="contained" 
-                            color="error" 
-                            sx={{ flex: 1, marginRight: 1 }}
+                            sx={{ 
+                                flex: 1,
+                                backgroundColor: 'rgba(255, 68, 68, 0.2)',
+                                color: '#ff4444',
+                                fontWeight: 600,
+                                padding: '12px',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 68, 68, 0.3)'
+                                }
+                            }}
                             onClick={returnToHome}
                         >
                             Return
                         </Button>
                         <Button 
                             variant="contained" 
-                            color="primary" 
-                            sx={{ flex: 1, marginLeft: 1 }}
+                            sx={{ 
+                                flex: 1,
+                                backgroundColor: 'rgba(29, 185, 84, 0.2)',
+                                color: '#1db954',
+                                fontWeight: 600,
+                                padding: '12px',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(29, 185, 84, 0.3)'
+                                }
+                            }}
                             onClick={signContract}
                         >
                             Sign Contract
@@ -92,7 +270,7 @@ const BidDetails = () => {
                     </Box>
                 </Paper>
             </Box>
-        </>
+        </Box>
     );
 }
 

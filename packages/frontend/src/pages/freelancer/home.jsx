@@ -60,7 +60,7 @@ const Home = () => {
                             Authorization: `Bearer ${token}`,
                         }
                     }) :
-                    await axios.get(`http://localhost:5000/jobs/${user.id}`, {
+                    await axios.get(`http://localhost:5000/jobs/jobsByClient/${user.id}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         }
