@@ -96,6 +96,20 @@ const BidDetails = () => {
                         >
                             Jobs
                         </Button>
+                        {user.user_type === 'Freelancer' && (
+                            <Button 
+                                color="inherit" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                                onClick={() => navigate("/bids", { state: { user, token } })}
+                            >
+                                Bids
+                            </Button>
+                        )}
                         <Button 
                             color="inherit" 
                             sx={{ 
@@ -104,19 +118,7 @@ const BidDetails = () => {
                                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
                                 }
                             }}
-                            onClick={() => navigate("/bids", { state: {user, token} })}
-                        >
-                            Bids
-                        </Button>
-                        <Button 
-                            color="inherit" 
-                            sx={{ 
-                                fontWeight: 600,
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                }
-                            }}
-                            onClick={() => navigate("/contracts", { state: {user, token} })}
+                            onClick={() => navigate("/contracts", { state: { user, token } })}
                         >
                             Contracts
                         </Button>
@@ -128,10 +130,24 @@ const BidDetails = () => {
                                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
                                 }
                             }}
-                            onClick={() => navigate("/payments", { state: {user, token} })}
+                            onClick={() => navigate("/payments", { state: { user, token } })}
                         >
                             Payments
                         </Button>
+                        {user.user_type === 'Freelancer' && (
+                            <Button 
+                                color="inherit" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                                onClick={() => navigate("/reviews", { state: { user, token } })}
+                            >
+                                Reviews
+                            </Button>
+                        )}
                         <Button 
                             color="inherit" 
                             sx={{ 
@@ -140,19 +156,7 @@ const BidDetails = () => {
                                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
                                 }
                             }}
-                            onClick={() => navigate("/reviews", { state: {user, token} })}
-                        >
-                            Reviews
-                        </Button>
-                        <Button 
-                            color="inherit" 
-                            sx={{ 
-                                fontWeight: 600,
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                }
-                            }}
-                            onClick={() => navigate("/account", { state: {user, token} })}
+                            onClick={() => navigate("/account", { state: { user, token } })}
                         >
                             Account
                         </Button>
@@ -197,7 +201,7 @@ const BidDetails = () => {
                             BID AMOUNT
                         </Typography>
                         <Chip
-                            label={`PKR ${bid.bid_amount}`}
+                            label={`Creds ${bid.bid_amount}`}
                             sx={{
                                 backgroundColor: 'rgba(29, 185, 84, 0.1)',
                                 color: '#1db954',

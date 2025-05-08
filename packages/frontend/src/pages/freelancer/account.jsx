@@ -121,18 +121,20 @@ const Account = () => {
                         >
                             Jobs
                         </Button>
-                        <Button 
-                            color="inherit" 
-                            sx={{ 
-                                fontWeight: 600,
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                }
-                            }}
-                            onClick={() => navigate("/bids", { state: { user, token } })}
-                        >
-                            Bids
-                        </Button>
+                        {user.user_type === 'Freelancer' && (
+                            <Button 
+                                color="inherit" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                                onClick={() => navigate("/bids", { state: { user, token } })}
+                            >
+                                Bids
+                            </Button>
+                        )}
                         <Button 
                             color="inherit" 
                             sx={{ 
@@ -157,18 +159,20 @@ const Account = () => {
                         >
                             Payments
                         </Button>
-                        <Button 
-                            color="inherit" 
-                            sx={{ 
-                                fontWeight: 600,
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                }
-                            }}
-                            onClick={() => navigate("/reviews", { state: { user, token } })}
-                        >
-                            Reviews
-                        </Button>
+                        {user.user_type === 'Freelancer' && (
+                            <Button 
+                                color="inherit" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                                onClick={() => navigate("/reviews", { state: { user, token } })}
+                            >
+                                Reviews
+                            </Button>
+                        )}
                         <Button 
                             color="inherit" 
                             sx={{ 

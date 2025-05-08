@@ -232,7 +232,7 @@ const PostJob = () => {
 
                         <TextField 
                             fullWidth 
-                            label="Budget (PKR)" 
+                            label="Budget (Creds)" 
                             name="budget" 
                             type="number" 
                             variant="filled"

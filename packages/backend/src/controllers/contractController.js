@@ -72,26 +72,20 @@ const createContract = async (req, res) => {
 
 const updateContract = async (req, res) => {
     try {
+        
         const contractId = parseInt(req.params.id);
-        const updates = req.body;
+        const { status } = req.body;
 
-        if (!updates || Object.keys(updates).length === 0) {
+        if (!status) {
             return res.status(400).json({ message: "No data given for updating" });
         }
 
         const pool = await connectDB();
         const request = pool.request();
 
-        // Build the SET clause with parameterized values
-        const setClauses = [];
-        Object.keys(updates).forEach((key, index) => {
-            const paramName = `param${index}`;
-            setClauses.push(`${key} = @${paramName}`);
-            request.input(paramName, updates[key]);
-        });
-
         // Build the complete query
-        const query = `UPDATE Contracts SET ${setClauses.join(', ')} WHERE id = @id`;
+        const query = `UPDATE Contracts SET status = @status WHERE id = @id`;
+        request.input('status', sql.NVarChar, status);
         request.input('id', sql.Int, contractId);
 
         // Execute the query

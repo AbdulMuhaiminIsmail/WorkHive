@@ -137,7 +137,7 @@ const Home = () => {
                         >
                             Jobs
                         </Button>
-                        {user.user_type === "Freelancer" && (
+                        {user.user_type === 'Freelancer' && (
                             <Button 
                                 color="inherit" 
                                 sx={{ 
@@ -146,7 +146,7 @@ const Home = () => {
                                         backgroundColor: 'rgba(255, 255, 255, 0.1)'
                                     }
                                 }}
-                                onClick={() => navigate("/bids", { state: {user, token} })}
+                                onClick={() => navigate("/bids", { state: { user, token } })}
                             >
                                 Bids
                             </Button>
@@ -159,7 +159,7 @@ const Home = () => {
                                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
                                 }
                             }}
-                            onClick={() => navigate("/contracts", { state: {user, token} })}
+                            onClick={() => navigate("/contracts", { state: { user, token } })}
                         >
                             Contracts
                         </Button>
@@ -171,7 +171,33 @@ const Home = () => {
                                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
                                 }
                             }}
-                            onClick={() => navigate("/account", { state: {user, token} })}
+                            onClick={() => navigate("/payments", { state: { user, token } })}
+                        >
+                            Payments
+                        </Button>
+                        {user.user_type === 'Freelancer' && (
+                            <Button 
+                                color="inherit" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                                onClick={() => navigate("/reviews", { state: { user, token } })}
+                            >
+                                Reviews
+                            </Button>
+                        )}
+                        <Button 
+                            color="inherit" 
+                            sx={{ 
+                                fontWeight: 600,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                            onClick={() => navigate("/account", { state: { user, token } })}
                         >
                             Account
                         </Button>
@@ -370,7 +396,7 @@ const Home = () => {
                                         borderRadius: '0 0 4px 4px'
                                     }}>
                                         <Chip 
-                                            label={`Budget: PKR ${job.budget}`}
+                                            label={`Budget: Creds ${job.budget}`}
                                             sx={{
                                                 backgroundColor: 'rgba(29, 185, 84, 0.1)',
                                                 color: '#1db954'

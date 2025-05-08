@@ -52,27 +52,19 @@ const initiatePayment = async (req, res) => {
 const updatePayment = async (req, res) => {
     try {
         const contractId = parseInt(req.params.id);
-        const updates = req.body;
+        const { status } = req.body;
 
-        if (!updates || Object.keys(updates).length === 0) {
+        if (!status) {
             return res.status(400).json({message: "No data given for updating"});
         }
         
         const pool = await connectDB();
         const request = pool.request();
-        
-        // Build dynamic parameters
-        let params = [];
-        Object.keys(updates).forEach((key, index) => {
-            let type = key === "status" ? NVarChar(8) : sql.NVarChar(sql.MAX);
-            request.input(`param${index}`, type, updates[key]);
-            params.push(`${key} = @param${index}`);
-        });
 
-        const paramString = params.join(', ');
         await request
-            .input("contractId", sql.Int, contractId)
-            .query(`EXEC sp_UpdatePayment @contractId, @updates='${paramString}'`);
+            .input("id", sql.Int, contractId)
+            .input("status", sql.NVarChar, status)
+            .query("UPDATE Payments SET status = @status WHERE id = @id");
 
         res.status(200).json({message: "Payment updated successfully!"});
     } catch (err) {

@@ -77,18 +77,20 @@ const Bid = () => {
                         >
                             Jobs
                         </Button>
-                        <Button 
-                            color="inherit" 
-                            sx={{ 
-                                fontWeight: 600,
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                }
-                            }}
-                            onClick={() => navigate("/bids", { state: { user, token } })}
-                        >
-                            Bids
-                        </Button>
+                        {user.user_type === 'Freelancer' && (
+                            <Button 
+                                color="inherit" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                                onClick={() => navigate("/bids", { state: { user, token } })}
+                            >
+                                Bids
+                            </Button>
+                        )}
                         <Button 
                             color="inherit" 
                             sx={{ 
@@ -113,18 +115,20 @@ const Bid = () => {
                         >
                             Payments
                         </Button>
-                        <Button 
-                            color="inherit" 
-                            sx={{ 
-                                fontWeight: 600,
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                }
-                            }}
-                            onClick={() => navigate("/reviews", { state: { user, token } })}
-                        >
-                            Reviews
-                        </Button>
+                        {user.user_type === 'Freelancer' && (
+                            <Button 
+                                color="inherit" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                }}
+                                onClick={() => navigate("/reviews", { state: { user, token } })}
+                            >
+                                Reviews
+                            </Button>
+                        )}
                         <Button 
                             color="inherit" 
                             sx={{ 
@@ -140,7 +144,7 @@ const Bid = () => {
                     </Box>
                 </Toolbar>
             </AppBar>
-
+            
             {/* Bid Form */}
             <Box sx={{ 
                 maxWidth: 600, 
@@ -176,7 +180,7 @@ const Bid = () => {
                     <TextField
                         fullWidth
                         variant="filled"
-                        label="Bid Amount (PKR)"
+                        label="Bid Amount (Creds)"
                         type="number"
                         sx={{ 
                             marginBottom: 3,
