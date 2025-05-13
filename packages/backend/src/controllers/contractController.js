@@ -9,7 +9,6 @@ const fetchAllContractsOfFreelancer = async (req, res) => {
                             .query("EXEC sp_GetContractsByFreelancer @freelancerId");
 
         res.status(200).json(response.recordset);
-        console.log(response.recordset);
     } catch (err) {
         console.error(err);
         res.status(500).json({error: "Internal Server Error"});

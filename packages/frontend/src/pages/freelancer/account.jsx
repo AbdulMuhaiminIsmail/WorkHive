@@ -45,7 +45,7 @@ const Account = () => {
                 }) : await axios.get(`http://localhost:5000/users/clientJobsCount/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
-                console.log(response);
+
                 setJobsCount(response.data.jobsCount[0]?.jobsCount || 0);
             } catch (err) {
                 console.error("Error fetching jobs count", err);
@@ -73,7 +73,7 @@ const Account = () => {
                 console.error("Error fetching credits", err);
             }
         }
-
+        
         fetchCredits(user.id);
         fetchAvgRating(user.id);
         fetchJobsCount(user.id);

@@ -82,7 +82,6 @@ const Register = () => {
     const handleUserRegistration = async () => {
         try {
             const response = await axios.post("http://localhost:5000/auth/register", formData);
-            console.log(response);
             setUserId(response.data.id);
             return response.data.id;
         } catch (err) {

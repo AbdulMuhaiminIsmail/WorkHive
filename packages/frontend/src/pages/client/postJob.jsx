@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
     AppBar, Toolbar, Typography, Button, TextField, Paper, Box,
@@ -12,6 +12,13 @@ const PostJob = () => {
     const user = location.state?.user;
     const token = location.state?.token;
     
+    const [credits, setCredits] = useState(0);
+    
+    const [errors, setErrors] = useState({
+        budget: "",
+        deadline: ""
+    });
+
     const [jobData, setJobData] = useState({
         title: "",
         description: "",
@@ -20,12 +27,47 @@ const PostJob = () => {
         clientId: user.id
     });
 
+    useEffect(() => {
+        const fetchCredits = async (userId) => {
+            try {
+                const response = await axios.get(`http://localhost:5000/users/fetchCredits/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setCredits(response.data.credits[0].credits);
+            } catch (err) {
+                console.error("Error fetching credits", err);
+            }
+        };
+    
+        if (user?.id && token) fetchCredits(user.id);
+    }, [user?.id, token]);  
+
     const handleChange = (e) => {
         setJobData({ ...jobData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
+        let validationErrors = {};
+    
+        // Check if deadline is in the past
+        const today = new Date().toISOString().split("T")[0];
+        if (jobData.deadline < today) {
+            validationErrors.deadline = "Deadline cannot be before today.";
+        }
+    
+        // Check if budget exceeds available credits
+        if (parseInt(jobData.budget) > credits) {
+            validationErrors.budget = `Insufficient credits. You have ${credits} credits available.`;
+        }
+    
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+    
+        // Submit if valid
         try {
             await axios.post("http://localhost:5000/jobs", jobData, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -34,8 +76,8 @@ const PostJob = () => {
         } catch (err) {
             console.error("Error posting job:", err);
         }
-    };
-
+    };    
+    
     return (
         <Box sx={{ 
             minHeight: '100vh', 
@@ -238,6 +280,8 @@ const PostJob = () => {
                             variant="filled"
                             margin="normal" 
                             onChange={handleChange} 
+                            error={!!errors.budget}
+                            helperText={errors.budget}
                             required
                             sx={{
                                 '& .MuiFilledInput-root': {
@@ -270,6 +314,8 @@ const PostJob = () => {
                             InputLabelProps={{ shrink: true }} 
                             onChange={handleChange} 
                             required
+                            error={!!errors.deadline}
+                            helperText={errors.deadline}
                             sx={{
                                 '& .MuiFilledInput-root': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',

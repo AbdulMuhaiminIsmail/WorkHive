@@ -74,19 +74,23 @@ const Contracts = () => {
         }
     };
 
-    const handleCancelContract = async (contractId) => {
+    const handleCancelContract = async (contract) => {
         try {
-            await axios.put(`http://localhost:5000/contracts/${contractId}`, { status: 'Cancelled' }, {
+            await axios.put(`http://localhost:5000/contracts/${contract.id}`, { status: 'Cancelled' }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            await axios.put(`http://localhost:5000/payments/${contractId}`, { status: 'Failed' }, {
+            await axios.put(`http://localhost:5000/payments/${contract.id}`, { status: 'Failed' }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+
+            await axios.put(`http://localhost:5000/jobs/${contract.job_id}`, { status: 'Listed' },
+                {headers: { Authorization: `Bearer ${token}` } }
+            );
 
             setContracts(prev =>
                 prev.map(contract =>
-                    contract.id === contractId ? { ...contract, status: 'Cancelled' } : contract
+                    contract.id === contract.id ? { ...contract, status: 'Cancelled' } : contract
                 )
             );
         } catch (err) {
@@ -431,7 +435,7 @@ const Contracts = () => {
                                                         backgroundColor: 'rgba(255, 68, 68, 0.3)'
                                                     }
                                                 }}
-                                                onClick={() => handleCancelContract(contract.id)}
+                                                onClick={() => handleCancelContract(contract)}
                                             >
                                                 Cancel
                                             </Button>

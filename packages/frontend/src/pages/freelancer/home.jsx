@@ -1,4 +1,4 @@
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, ConnectingAirportsOutlined, ConstructionOutlined } from "@mui/icons-material";
 import { Fab } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -55,23 +55,38 @@ const Home = () => {
         const fetchJobs = async () => {
             try {
                 const response = (user.user_type === "Freelancer") ?
-                    await axios.get("http://localhost:5000/jobs", {
+                await axios.get("http://localhost:5000/jobs", {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         }
                     }) :
+                    
                     await axios.get(`http://localhost:5000/jobs/jobsByClient/${user.id}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         }
                     });
                 
-                // Filter out expired jobs
-                const currentDate = new Date();
-                const activeJobs = response.data.filter(job => 
-                    new Date(job.deadline) > currentDate
-                );
-                setJobs(activeJobs);
+                    // Filter out expired jobs
+                    const currentDate = new Date();
+                    let filteredJobs = response.data.filter(job => 
+                        new Date(job.deadline) > currentDate
+                    );
+
+                if (user.user_type === "Freelancer") {
+                    const bidsResponse = await axios.get(`http://localhost:5000/bids/freelancer/${user.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }
+                    })
+
+                    const bidJobIds = bidsResponse.data.map(bid => bid.job_id);
+                    const availableJobs = filteredJobs.filter(job => !bidJobIds.includes(job.id));
+                    filteredJobs = availableJobs;
+                }
+
+                
+                setJobs(filteredJobs);
             } catch (err) {
                 console.error(err);
             }

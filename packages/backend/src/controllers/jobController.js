@@ -87,46 +87,18 @@ const createJob = async (req, res) => {
 const updateJob = async (req, res) => {
     try {
         const jobId = parseInt(req.params.id);
-        const updates = req.body;
+        const { status } = req.body;
 
-        if (!updates || Object.keys(updates).length === 0) {
+        if (!status) {
             return res.status(400).json({message: "No data given for updating"});
         }
         
         const pool = await connectDB();
         const request = pool.request();
-        
-        // Build dynamic parameters
-        let params = [];
-        Object.keys(updates).forEach((key, index) => {
-            let type;
-            switch (key) {
-                case 'title':
-                case 'description':
-                case 'status':
-                    type = sql.NVarChar(sql.MAX);
-                    break;
-                case 'client_id':
-                    type = sql.Int;
-                    break;
-                case 'budget':
-                    type = sql.Decimal(10, 2);
-                    break;
-                case 'deadline':
-                case 'posted_at':
-                    type = sql.DateTime2;
-                    break;
-                default:
-                    type = sql.NVarChar(sql.MAX);
-            }
-            request.input(`param${index}`, type, updates[key]);
-            params.push(`${key} = @param${index}`);
-        });
 
-        const paramString = params.join(', ');
-        await request
-            .input("id", sql.Int, jobId)
-            .query(`EXEC sp_UpdateJob @id, @updates='${paramString}'`);
+        request.input("id", sql.Int, jobId);
+        request.input("status", sql.NVarChar, status);
+        await request.query("UPDATE Jobs SET status = @status WHERE id = @id");
 
         res.status(200).json({message: "Job updated successfully!"});
     } catch (err) {

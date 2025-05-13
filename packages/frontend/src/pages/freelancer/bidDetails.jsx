@@ -16,6 +16,23 @@ import {
     Avatar
 } from "@mui/material";
 
+useEffect(() => {
+    if (!user?.id || !token) return;
+
+    const fetchCredits = async (userId) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/users/fetchCredits/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setCredits(response.data.credits[0].credits);
+        } catch (err) {
+            console.error("Error fetching credits", err);
+        }
+    };
+
+    fetchCredits(user.id);
+}, [user?.id, token]);
+
 const BidDetails = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -25,8 +42,16 @@ const BidDetails = () => {
     const job = location.state?.job;
     const bid = location.state?.bid;
 
+    const [credits, setCredits] = useState(0);
+    const [creditsError, setCreditsError] = ("");
+    
     const signContract = async () => {
         try {
+            if (credits < bid.bid_amount) {
+                setCreditsError("You do not have sufficient credits to sign this contract");
+                return;
+            }
+
             const response = await axios.post(`http://localhost:5000/contracts`,
                 {
                     jobId: job.id, 
@@ -35,8 +60,6 @@ const BidDetails = () => {
                 },
                 {headers: { Authorization: `Bearer ${token}` } }
             );
-
-            console.log(response);
             
             await axios.post(`http://localhost:5000/payments`,
                 {
@@ -44,7 +67,11 @@ const BidDetails = () => {
                     amount: bid.bid_amount
                 },
                 {headers: { Authorization: `Bearer ${token}` } }
-            )
+            );
+
+            await axios.put(`http://localhost:5000/jobs/${job.id}`, { status: 'Assigned' },
+                {headers: { Authorization: `Bearer ${token}` } }
+            );
 
             navigate("/home", { state: { user, token } });
         } catch (err) {

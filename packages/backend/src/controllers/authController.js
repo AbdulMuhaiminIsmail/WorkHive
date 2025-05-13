@@ -76,7 +76,6 @@ const registerUser = async (req, res) => {
 
         const newUserId = response.output.new_user_id;
         res.status(200).json({id: newUserId, message: "User registered successfully!"});
-        console.log("User registered successfully!");
     }
     catch (err) {
         console.error(err);
