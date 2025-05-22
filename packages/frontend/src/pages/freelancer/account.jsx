@@ -11,7 +11,7 @@ import {
     Chip,
     Divider
 } from "@mui/material";
-import { Star, Edit } from "@mui/icons-material";
+import { Star, Edit, Logout } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -73,7 +73,7 @@ const Account = () => {
                 console.error("Error fetching credits", err);
             }
         }
-        
+
         fetchCredits(user.id);
         fetchAvgRating(user.id);
         fetchJobsCount(user.id);
@@ -186,6 +186,22 @@ const Account = () => {
                             Account
                         </Button>
                     </Box>
+                    <IconButton
+                        color="inherit"
+                        onClick={() => {
+                            navigate("/");
+                        }}
+                        sx={{
+                            marginLeft: 2,
+                            backgroundColor: 'rgba(255, 65, 65, 0.1)',
+                            '&:hover': {
+                                backgroundColor: 'rgba(255, 65, 65, 0.2)'
+                            }
+                        }}
+                        title="Logout"
+                    >
+                        <Logout sx={{ color: '#ff4141' }} />
+                    </IconButton>
                 </Toolbar>
             </AppBar>
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { 
     AppBar, 
     Toolbar, 
@@ -16,23 +17,6 @@ import {
     Avatar
 } from "@mui/material";
 
-useEffect(() => {
-    if (!user?.id || !token) return;
-
-    const fetchCredits = async (userId) => {
-        try {
-            const response = await axios.get(`http://localhost:5000/users/fetchCredits/${userId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setCredits(response.data.credits[0].credits);
-        } catch (err) {
-            console.error("Error fetching credits", err);
-        }
-    };
-
-    fetchCredits(user.id);
-}, [user?.id, token]);
-
 const BidDetails = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -44,6 +28,23 @@ const BidDetails = () => {
 
     const [credits, setCredits] = useState(0);
     const [creditsError, setCreditsError] = ("");
+    
+    useEffect(() => {
+        if (!user?.id || !token) return;
+    
+        const fetchCredits = async (userId) => {
+            try {
+                const response = await axios.get(`http://localhost:5000/users/fetchCredits/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setCredits(response.data.credits[0].credits);
+            } catch (err) {
+                console.error("Error fetching credits", err);
+            }
+        };
+    
+        fetchCredits(user.id);
+    }, [user?.id, token]);    
     
     const signContract = async () => {
         try {
