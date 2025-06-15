@@ -2,7 +2,7 @@
 
 ## 📌 Overview
 
-WorkHive is a **full-stack freelancing platform** designed to foster **collaboration, networking, and productivity**. Unlike traditional freelancing websites, WorkHive focuses on meaningful interactions and professional connections.
+WorkHive is a **full-stack freelancing platform** designed to foster **collaboration, networking, and productivity**. It aims to bridge the gap between industry demand and the talented professionals.
 
 ## 🚀 Tech Stack
 
@@ -17,33 +17,34 @@ WorkHive is a **full-stack freelancing platform** designed to foster **collabora
 
 ```
 WorkHive/
-│── backend/                  # Express.js API and MSSQL Database Integration
-│   ├── src/
-│   │   ├── config/           # Database and server configuration
-│   │   ├── controllers/      # Business logic and API controllers
-│   │   ├── middleware/       # Authentication and validation middleware
-│   │   ├── models/           # Database models and schema definitions
-│   │   ├── routes/           # Express.js API routes
-│   │   ├── utils/            # Utility functions
-│   │   ├── app.js            # Main app entry point
-│   │   ├── server.js         # Server setup
-│   ├── .env                  # Environment variables
-│   ├── package.json          # Backend dependencies
+│── packages/ # Monorepo structure containing backend and frontend
+│ ├── backend/ # Express.js API and MSSQL Database Integration
+│ │ ├── src/
+│ │ │ ├── config/ # Database and server configuration
+│ │ │ ├── controllers/ # Business logic and API controllers
+│ │ │ ├── middleware/ # Authentication and validation middleware
+│ │ │ ├── models/ # Database models and schema definitions
+│ │ │ ├── routes/ # Express.js API routes
+│ │ │ ├── utils/ # Utility functions
+│ │ │ ├── app.js # Main app entry point
+│ │ │ ├── server.js # Server setup
+│ │ ├── .env # Environment variables
+│ │ ├── package.json # Backend dependencies
+│ │
+│ ├── frontend/ # React.js Client Side
+│ │ ├── src/
+│ │ │ ├── components/ # Reusable UI components
+│ │ │ ├── pages/ # Page views
+│ │ │ ├── hooks/ # Custom hooks
+│ │ │ ├── context/ # Global state management
+│ │ │ ├── services/ # API calls and services
+│ │ │ ├── App.js # Main React app file
+│ │ ├── public/ # Static assets
+│ │ ├── package.json # Frontend dependencies
 │
-│── frontend/                 # React.js Client Side
-│   ├── src/
-│   │   ├── components/       # Reusable UI components
-│   │   ├── pages/            # Page views
-│   │   ├── hooks/            # Custom hooks
-│   │   ├── context/          # Global state management
-│   │   ├── services/         # API calls and services
-│   │   ├── App.js            # Main React app file
-│   ├── public/               # Static assets
-│   ├── package.json          # Frontend dependencies
-│
-│── .gitignore                # Git Ignore File
-│── README.md                 # Project Documentation
-│── LICENSE                   # License File
+│── .gitignore # Git Ignore File
+│── README.md # Project Documentation
+│── LICENSE # License File
 ```
 
 This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
